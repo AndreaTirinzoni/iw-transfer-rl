@@ -45,7 +45,7 @@ class ValueBased(Policy):
     
     def _q_values(self, state):
         
-        return self._Q(np.concatenate((matlib.repmat(state, self._n_actions, 1), self._actions[:,np.newaxis]), 1))
+        return self._Q.values(np.concatenate((matlib.repmat(state, self._n_actions, 1), self._actions[:,np.newaxis]), 1))
     
     
 class EpsilonGreedy(ValueBased):
@@ -73,7 +73,7 @@ class EpsilonGreedy(ValueBased):
     def __call__(self, state):
         
         probs = np.ones(self._n_actions) * self._epsilon / self._n_actions
-        probs[np.argmax(self._Q(state))] += 1 - self._epsilon
+        probs[np.argmax(self._q_values(state))] += 1 - self._epsilon
         return probs
         
     def sample_action(self, state):
@@ -81,7 +81,7 @@ class EpsilonGreedy(ValueBased):
         if np.random.uniform() < self._epsilon:
             return np.array([self._actions[np.random.choice(self._n_actions)]])
         else:
-            return np.array([self._actions[np.argmax(self._Q(state))]])
+            return np.array([self._actions[np.argmax(self._q_values(state))]])
         
 class Softmax(ValueBased):
     """
@@ -106,7 +106,7 @@ class Softmax(ValueBased):
         
     def __call__(self, state):
         
-        exps = np.exp(self._Q(state) / self._tau)
+        exps = np.exp(self._q_values(state) / self._tau)
         return exps / np.sum(exps)
         
     def sample_action(self, state):

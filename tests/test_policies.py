@@ -10,8 +10,8 @@ class TestQFunction(QFunction):
     def __init__(self,vals):
         self.vals = vals
         
-    def __call__(self, state):
-        
+    def values(self, sa):
+
         return np.array(self.vals)
 
 class TestValueBased(TestCase):
