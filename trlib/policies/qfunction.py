@@ -75,6 +75,8 @@ class DiscreteFittedQ(QFunction):
         
     def __call__(self, state, action):
         
+        if not np.shape(state)[0] == self._state_dim:
+            raise AttributeError("State is not of the right shape")
         return self._action_values(state[np.newaxis,:], action)
     
     
@@ -86,9 +88,17 @@ class DiscreteFittedQ(QFunction):
         
         if not np.shape(sa)[1] == self._state_dim + 1:
             raise AttributeError("An Nx(S+1) matrix must be provided")
-        vals = np.array()
+        
+        vals = np.zeros(np.shape(sa)[0])
+        check_mask = np.zeros(np.shape(sa)[0])
+        
         for a in range(self._n_actions):
-            vals = np.concatenate((vals,self._action_values(sa[sa[:,-1]==a, 0:-2], a)), 0)
+            mask = sa[:,-1] == a
+            check_mask = np.logical_or(mask,check_mask)
+            vals[mask] = self._action_values(sa[mask, 0:-1], a)
+        
+        if not np.all(check_mask):
+            raise AttributeError("Some action in sa does not exist")
         
         return vals
     
