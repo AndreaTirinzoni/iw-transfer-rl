@@ -1,5 +1,9 @@
-'''
-Created on Dec 25, 2017
+import numpy as np
 
-@author: andrea
-'''
+class QFunction:
+    """
+    Base class for all Q-functions
+    """
+    
+    def __init__(self):
+        pass
