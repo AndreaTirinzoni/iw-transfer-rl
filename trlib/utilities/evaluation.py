@@ -33,6 +33,7 @@ def evaluate_policy(mdp, policy, criterion = 'discounted', n_episodes = 1, initi
     elif n_threads > 1 and type(initial_states) is list:
         scores = Parallel(n_jobs = n_threads)(delayed(_single_eval)(mdp, policy, criterion, init_state) for init_state in initial_states)
     
+    n_episodes = len(initial_states) if type(initial_states) is list else n_episodes
     scores = np.array(scores)
     return np.mean(scores), np.std(scores) / np.sqrt(n_episodes)
 
