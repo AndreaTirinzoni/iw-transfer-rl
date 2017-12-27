@@ -19,9 +19,9 @@ class Parametric(Policy):
     
     @theta.setter
     def theta(self,value):
-        if not isinstance(value, np.array):
+        if not isinstance(value, np.ndarray):
             raise AttributeError("Theta must be a numpy array")
-        if not np.shape(value) == np.shape(self._theta):
+        if hasattr(self, "_theta") and not np.shape(value) == np.shape(self._theta):
             raise AttributeError("Theta must not change shape")
         self._theta = value
         

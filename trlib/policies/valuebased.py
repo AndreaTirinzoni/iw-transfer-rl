@@ -111,4 +111,4 @@ class Softmax(ValueBased):
         
     def sample_action(self, state):
         
-        return np.random.choice(self._n_actions, p = self(state))
+        return np.array([self._actions[np.random.choice(self._n_actions, p = self(state))]])
