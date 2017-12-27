@@ -66,7 +66,13 @@ class TestEvaluation(TestCase):
         score_mean, score_std = evaluate_policy(mdp, pi, "discounted", n_episodes = 10, initial_states = np.array([10.0,10.0]), n_threads = 1)
         self.assertTrue(np.linalg.norm(11.0 * 1.0 + 12.0 * 0.99 + 13.0 * 0.99 * 0.99 - score_mean) < 0.0000001)
         self.assertTrue(np.linalg.norm(0 - score_std) < 0.0000001)
+        
         score_mean, score_std = evaluate_policy(mdp, pi, "discounted", n_episodes = 10, initial_states = [np.array([0.0,0.0]), np.array([10.0,10.0])], n_threads = 1)
+        scores = np.array([1.0 * 1.0 + 2.0 * 0.99 + 3.0 * 0.99 *0.99, 11.0 * 1.0 + 12.0 * 0.99 + 13.0 * 0.99 *0.99])
+        self.assertTrue(np.linalg.norm(np.mean(scores) - score_mean) < 0.0000001)
+        self.assertTrue(np.linalg.norm(np.std(scores) / np.sqrt(2) - score_std) < 0.0000001)
+        
+        score_mean, score_std = evaluate_policy(mdp, pi, "discounted", n_episodes = 10, initial_states = [np.array([0.0,0.0]), np.array([10.0,10.0])], n_threads = 2)
         scores = np.array([1.0 * 1.0 + 2.0 * 0.99 + 3.0 * 0.99 *0.99, 11.0 * 1.0 + 12.0 * 0.99 + 13.0 * 0.99 *0.99])
         self.assertTrue(np.linalg.norm(np.mean(scores) - score_mean) < 0.0000001)
         self.assertTrue(np.linalg.norm(np.std(scores) / np.sqrt(2) - score_std) < 0.0000001)
