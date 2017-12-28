@@ -1,7 +1,7 @@
 import numpy as np
 from joblib import Parallel, delayed
 
-def generate_episodes(mdp, policy, n_episodes, n_threads):
+def generate_episodes(mdp, policy, n_episodes = 1, n_threads = 1):
     """
     Generates episodes in a given mdp using a given policy
     

@@ -110,6 +110,10 @@ class FittedQ(QFunction):
             max_actions[i,:] = actions[a,:]
             
         return (max_vals,max_actions)
+    
+    def fit(self, sa, q, **kwargs):
+        
+        self._regressor.fit(sa, q, **kwargs)
         
 class DiscreteFittedQ(QFunction):
     """
@@ -174,4 +178,10 @@ class DiscreteFittedQ(QFunction):
         max_vals = vals[idx,max_actions]
         
         return max_vals, max_actions
+    
+    def fit(self, sa, q, **kwargs):
+        
+        for a in range(self._n_actions):
+            mask = sa[:,-1] == a
+            self._regressors[a].fit(sa[mask, 0:-1], q[mask], **kwargs)
     

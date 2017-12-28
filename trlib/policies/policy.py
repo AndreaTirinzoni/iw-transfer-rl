@@ -32,3 +32,16 @@ class Policy(object):
         An A-dimensional vector, where A is the action-space dimension
         """
         raise NotImplementedError
+    
+class Uniform(Policy):
+    """
+    A uniform policy over a finite set of actions.
+    """
+    
+    def __init__(self, actions):
+        self._actions = actions
+        self._n_actions = len(actions)
+        
+    def sample_action(self, state):
+        return np.array([self._actions[np.random.choice(self._n_actions)]])
+    
