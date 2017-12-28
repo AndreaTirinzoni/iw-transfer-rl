@@ -29,7 +29,9 @@ class Acrobot(gym.Env):
     def __init__(self, m1 = 1.0, m2 = 1.0, l1 = 1.0, l2 = 1.0, mu1 = 0.01, mu2 = 0.01):
         self.horizon = 100
         self.gamma = .95
-
+        self.state_dim = 4
+        self.action_dim = 1
+        
         self._g = 9.81
         self._M1 = m1
         self._M2 = m2

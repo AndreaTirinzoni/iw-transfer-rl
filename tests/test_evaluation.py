@@ -12,6 +12,7 @@ class MockMDP:
         
     def reset(self,s = None):
         self._s = np.array(s) if s is not None else np.array([0,0])
+        return self._s
 
     def step(self,a):
         

@@ -28,6 +28,8 @@ class PuddleWorld(gym.Env):
 
         self.horizon = 50
         self.gamma = 0.99
+        self.state_dim = 2
+        self.action_dim = 1
         
         self.size = np.array([10,10])
         self.goal = np.array([goal_x,goal_y])

@@ -33,6 +33,8 @@ class Dam(gym.Env):
         
         self.horizon = 360
         self.gamma = 0.999
+        self.state_dim = 2
+        self.action_dim = 1
 
         self.DEMAND = demand  # Water demand -> At least DEMAND/day must be supplied or a cost is incurred
         self.FLOODING = flooding  # Flooding threshold -> No more than FLOODING can be stored or a cost is incurred
