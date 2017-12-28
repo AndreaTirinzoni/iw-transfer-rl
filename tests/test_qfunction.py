@@ -35,6 +35,22 @@ class TestFittedQ(TestCase):
             
         with self.assertRaises(AttributeError):
             Q.values(np.array([[1,2,3,4],[1,2,3,4]]))
+
+    def test_max(self):
+        
+        Q = FittedQ(MockRegressor(np.sum), 3, 2)
+        
+        states = np.array([[1,1,1],[2,2,2],[3,3,3],[4,4,4]])
+        actions = [np.array([1,1]), np.array([2,2])]
+        absorbing = np.array([0,1,0,1])
+        
+        vals, acts = Q.max(states, actions)
+        self.assertTrue(np.array_equal(np.array([7.0,10.0,13.0,16.0]), vals))
+        self.assertTrue(np.array_equal(np.array([[2,2],[2,2],[2,2],[2,2]]), acts))
+        
+        vals, acts = Q.max(states, actions,absorbing)
+        self.assertTrue(np.array_equal(np.array([7.0,0.0,13.0,0.0]), vals))
+        self.assertTrue(np.array_equal(np.array([[2,2],[1,1],[2,2],[1,1]]), acts))
         
 class TestDiscreteFittedQ(TestCase):
     
@@ -63,4 +79,20 @@ class TestDiscreteFittedQ(TestCase):
             
         with self.assertRaises(AttributeError):
             Q.values(np.array([[1,2,3,0],[1,2,3,2]]))
+            
+    def test_max(self):
+        
+        rs = [MockRegressor(np.sum), MockRegressor(np.prod)]
+        Q = DiscreteFittedQ(rs, 3)
+        
+        states = np.array([[1,1,1],[-2,2,2],[3,3,3],[-4,4,4]])
+        absorbing = np.array([1,0,0,1])
+        
+        vals, acts = Q.max(states)
+        self.assertTrue(np.array_equal(np.array([3.0,2.0,27.0,4.0]), vals))
+        self.assertTrue(np.array_equal(np.array([0,0,1,0]), acts))
+        
+        vals, acts = Q.max(states, absorbing=absorbing)
+        self.assertTrue(np.array_equal(np.array([0.0,2.0,27.0,0.0]), vals))
+        self.assertTrue(np.array_equal(np.array([0,0,1,0]), acts))
         

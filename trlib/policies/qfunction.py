@@ -1,4 +1,5 @@
 import numpy as np
+from numpy import matlib
 
 class QFunction:
     """
@@ -18,6 +19,7 @@ class QFunction:
         -------
         The value of (state,action).
         """
+        raise NotImplementedError
         
     def values(self, sa):
         """
@@ -31,6 +33,24 @@ class QFunction:
         -------
         An N-dimensional vector with the value of each state-action row vector in sa
         """
+        raise NotImplementedError
+    
+    def max(self, states, actions=None, absorbing=None):
+        """
+        Computes the action among actions achieving the maximum value for each state in states
+        
+        Parameters:
+        -----------
+        states: an NxS matrix
+        actions: a list of A-dimensional vectors
+        absorbing: an N-dimensional vector specifying whether each state is absorbing
+        
+        Returns:
+        --------
+        An NxA matrix with the maximizing actions and an N-dimensional vector with their values
+        """
+        raise NotImplementedError
+        
 
 class FittedQ(QFunction):
     """
@@ -57,7 +77,40 @@ class FittedQ(QFunction):
         if not np.shape(sa)[1] == self._state_dim + self._action_dim:
             raise AttributeError("An Nx(S+A) matrix must be provided")
         return self._regressor.predict(sa)
+    
+    def max(self, states, actions=None, absorbing=None):
+        
+        if not np.shape(states)[1] == self._state_dim:
+            raise AttributeError("Wrong dimensions of the input matrices")
+        if actions is None:
+            raise AttributeError("Actions must be provided")
 
+        n_actions = len(actions)
+        n_states = np.shape(states)[0]
+        actions = np.array(actions)
+        
+        sa = np.empty((n_states * n_actions, self._state_dim + self._action_dim))
+        for i in range(n_states):
+            sa[i*n_actions:(i+1)*n_actions,0:self._state_dim] = matlib.repmat(states[i,:], n_actions, 1)
+            sa[i*n_actions:(i+1)*n_actions,self._state_dim:] = actions
+            
+        vals = self.values(sa)
+        
+        if absorbing is not None:
+            absorbing = matlib.repmat(absorbing,n_actions,1).T.flatten()
+            vals[absorbing == 1] = 0
+          
+        max_vals = np.empty(n_states)
+        max_actions = np.empty((n_states,self._action_dim))
+        
+        for i in range(n_states):
+            val = vals[i*n_actions:(i+1)*n_actions]
+            a = np.argmax(val)
+            max_vals[i] = val[a]
+            max_actions[i,:] = actions[a,:]
+            
+        return (max_vals,max_actions)
+        
 class DiscreteFittedQ(QFunction):
     """
     A DiscreteFittedQ is a Q-function represented by a set of underlying regressors,
@@ -102,5 +155,23 @@ class DiscreteFittedQ(QFunction):
         
         return vals
     
+    def max(self, states, actions=None, absorbing=None):
+        
+        if not np.shape(states)[1] == self._state_dim:
+            raise AttributeError("Wrong dimensions of the input matrices")
     
+        n_states = np.shape(states)[0]
+        vals = np.empty((n_states,self._n_actions))
+        
+        for a in range(self._n_actions):
+            vals[:,a] = self._action_values(states, a)
+        
+        if absorbing is not None:
+            vals[absorbing == 1, :] = 0
+            
+        max_actions = np.argmax(vals,1)
+        idx = np.ogrid[:n_states]
+        max_vals = vals[idx,max_actions]
+        
+        return max_vals, max_actions
     
