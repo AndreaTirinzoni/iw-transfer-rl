@@ -50,6 +50,14 @@ class QFunction:
         An NxA matrix with the maximizing actions and an N-dimensional vector with their values
         """
         raise NotImplementedError
+    
+class ZeroQ(QFunction):
+    
+    def __call__(self, state, action):
+        return 0
+    
+    def values(self, sa):
+        return np.zeros(np.shape(sa)[0])
         
 
 class FittedQ(QFunction):
@@ -87,7 +95,7 @@ class FittedQ(QFunction):
 
         n_actions = len(actions)
         n_states = np.shape(states)[0]
-        actions = np.array(actions)
+        actions = np.array(actions).reshape((n_actions,self._action_dim))
         
         sa = np.empty((n_states * n_actions, self._state_dim + self._action_dim))
         for i in range(n_states):

@@ -18,7 +18,7 @@ class FQI(Algorithm):
         Journal of Machine Learning Research 6.Apr (2005): 503-556
     """
     
-    def __init__(self, mdp, policy, n_episodes, verbose = False, actions, batch_size, max_iterations, regressor_type, **kwargs):
+    def __init__(self, mdp, policy, n_episodes, actions, batch_size, max_iterations, regressor_type, verbose = False, **kwargs):
         
         super().__init__(mdp, policy, n_episodes, verbose)
         
@@ -26,7 +26,7 @@ class FQI(Algorithm):
         self._batch_size = batch_size
         self._max_iterations = max_iterations
         
-        regressor = regressor_type(kwargs)
+        regressor = regressor_type(**kwargs)
         
         if isinstance(mdp.action_space, spaces.Discrete):
             self.Q = DiscreteFittedQ([deepcopy(regressor) for _ in actions], mdp.state_dim)
@@ -49,16 +49,16 @@ class FQI(Algorithm):
         self.display("Iteration {0}".format(self._iteration))
         
         if self._iteration == 0:
-            y = self._r
+            y = r
         else:
             maxq, _ = self.Q.max(s_prime, self._actions, absorbing)
-            y = self._r + self.mdp.gamma * maxq
+            y = r.ravel() + self._mdp.gamma * maxq
 
-        self.Q.fit(sa, y, **kwargs)
+        self.Q.fit(sa, y.ravel(), **kwargs)
 
         self._iteration += 1
         
-    def step(self):
+    def step(self, **kwargs):
         
         self.display("Step {0}".format(self._steps))
         
@@ -69,7 +69,7 @@ class FQI(Algorithm):
         self._iteration = 0
         
         for _ in range(self._max_iterations):
-            self._iter(data[:,1:self._r_idx], data[:,self._r_idx:self._s_idx], data[:,self._s_idx:-1], data[:,-1])
+            self._iter(data[:,1:self._r_idx], data[:,self._r_idx:self._s_idx], data[:,self._s_idx:-1], data[:,-1], **kwargs)
             
         perf = evaluate_policy(self._mdp, self.policy, criterion = 'discounted', n_episodes = 4, initial_states = None, n_threads = 1)
         
