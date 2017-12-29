@@ -4,9 +4,10 @@ from trlib.policies.qfunction import ZeroQ
 from trlib.algorithms.reinforcement.fqi import FQI
 from sklearn.ensemble.forest import ExtraTreesRegressor
 from trlib.experiments.results import Result
-from trlib.experiments.visualizer import plot_steps
+from trlib.experiments.visualizer import plot_steps, plot_experiment
 from trlib.algorithms.callbacks import save_json_callback, eval_policy_callback
 import numpy as np
+from trlib.experiments.experiment import Experiment
 
 result_file = "results.json"
 
@@ -19,16 +20,17 @@ regressor_params = {'n_estimators': 50,
                     'min_samples_split':20,
                     'min_samples_leaf': 2}
 
-fqi = FQI(mdp, pi, verbose = True, actions = actions, batch_size = 10, max_iterations = 30, regressor_type = ExtraTreesRegressor, **regressor_params)
+fqi = FQI(mdp, pi, verbose = True, actions = actions, batch_size = 5, max_iterations = 30, regressor_type = ExtraTreesRegressor, **regressor_params)
 
 fit_params = {}
 
 callbacks = [eval_policy_callback("perf_disc", criterion = 'discounted', initial_states = [np.array([100.0,1]) for _ in range(5)]),
-             eval_policy_callback("perf_avg", criterion = 'average', initial_states = [np.array([100.0,1]) for _ in range(5)]),
-             save_json_callback(result_file)]
+             eval_policy_callback("perf_avg", criterion = 'average', initial_states = [np.array([100.0,1]) for _ in range(5)])]
 
-fqi.run(5, callbacks, **fit_params)
+experiment = Experiment("FQI Experiment", fqi, n_steps = 10, n_runs = 5, callbacks = callbacks, **fit_params)
+result = experiment.run(1)
+result.save_json(result_file)
 
 result = Result.load_json(result_file)
-plot_steps(result, x_name="n_episodes", y_name="perf_disc")
-plot_steps(result, x_name="n_episodes", y_name="perf_avg")
+plot_experiment(result, x_name="n_episodes", y_name="perf_disc")
+plot_experiment(result, x_name="n_episodes", y_name="perf_avg")

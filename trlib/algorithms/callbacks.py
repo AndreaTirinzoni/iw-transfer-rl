@@ -1,4 +1,3 @@
-import json
 from trlib.utilities.evaluation import evaluate_policy
 
 def save_json_callback(file_name):
@@ -15,8 +14,7 @@ def save_json_callback(file_name):
     """
     
     def fun(algorithm):
-        with open(file_name,"w") as file:
-            json.dump(algorithm._result.__dict__,file)
+        algorithm._result.save_json(file_name)
             
     return fun
 

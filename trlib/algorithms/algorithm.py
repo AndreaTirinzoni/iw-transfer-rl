@@ -1,4 +1,4 @@
-from trlib.experiments.results import Result
+from trlib.experiments.results import AlgorithmResult
 from trlib.policies.policy import Policy
 import gym
 
@@ -85,4 +85,4 @@ class Algorithm(object):
         """
         self._step = 0
         self.n_episodes = 0
-        self._result = Result(self._name)
+        self._result = AlgorithmResult(self._name)
