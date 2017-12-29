@@ -38,3 +38,17 @@ def eval_policy_callback(field_name, criterion = 'discounted', n_episodes = 1, i
         algorithm._result.steps[algorithm._step][field_name] = perf
     
     return fun
+
+def get_callbacks(callback_list):
+    
+    callbacks = []
+    
+    for name,params in callback_list:
+        callbacks.append(globals()[name](**params))
+        
+    return callbacks
+
+def get_callback_list_entry(name, **params):
+    
+    return (name, params)
+    
