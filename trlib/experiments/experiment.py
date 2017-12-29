@@ -1,6 +1,7 @@
 from joblib import Parallel, delayed
 from trlib.experiments.results import ExperimentResult
 from trlib.algorithms.callbacks import get_callbacks
+import numpy as np
 
 class Experiment:
     
@@ -15,8 +16,10 @@ class Experiment:
         
         self._result = ExperimentResult(name, n_runs = n_runs)
         
-    def _run_algorithm(self):
+    def _run_algorithm(self, seed = None):
         
+        if seed is not None:
+            np.random.seed(seed)
         self._algorithm.reset()
         callbacks = get_callbacks(self._callback_list)
         return self._algorithm.run(self._n_steps, callbacks, **self._algorithm_params)
@@ -26,7 +29,8 @@ class Experiment:
         if n_jobs == 1:
             results = [self._run_algorithm() for _ in range(self._n_runs)]
         elif n_jobs > 1:
-            results = Parallel(n_jobs = n_jobs)(delayed(self._run_algorithm)() for _ in range(self._n_runs))
+            seeds = [np.random.randint(1000000) for _ in range(self._n_runs)]
+            results = Parallel(n_jobs = n_jobs)(delayed(self._run_algorithm)(seed) for seed in seeds)
         
         for result in results:
             self._result.add_run(result)
