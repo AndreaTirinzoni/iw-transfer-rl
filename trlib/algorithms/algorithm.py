@@ -41,9 +41,9 @@ class Algorithm(object):
         """
         self.display("Step {0}".format(self._step))
         
-        self._step_core(**kwargs)
+        self._result.add_step(step=self._step)
         
-        self._result.add_step(step=self._step, n_episodes=self.n_episodes)
+        self._step_core(**kwargs)
         
         for cb in callbacks:
             cb(self)

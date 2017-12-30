@@ -1,6 +1,5 @@
 import numpy as np
 from numpy import matlib
-from examples.test import regressor_params
 
 class QFunction:
     """

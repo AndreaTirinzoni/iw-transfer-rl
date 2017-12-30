@@ -4,10 +4,27 @@ from trlib.algorithms.callbacks import get_callbacks
 import numpy as np
 
 class Experiment:
+    """
+    Base class for all experiments. An experiment consists of running multiple algorithms multiple times.
+    """
+    
+    def __init__(self, name):
+        
+        self._name = name
+        
+class RepeatExperiment(Experiment):
+    """
+    A repeat-experiment is an experiment where an algorithm is run multiple times.
+    
+    Notice that the list of callbacks for the algorithm provided to this class must be in the
+    form of a callback-specification list (see algorithms.callbacks.py). A list of callback
+    functions is not accepted since it is not possible to pickle closures.
+    """
     
     def __init__(self, name, algorithm, n_steps, n_runs = 1, callback_list = [], **algorithm_params):
         
-        self._name = name
+        super().__init__(name)
+        
         self._algorithm = algorithm
         self._n_steps = n_steps
         self._n_runs = n_runs
@@ -25,6 +42,13 @@ class Experiment:
         return self._algorithm.run(self._n_steps, callbacks, **self._algorithm_params)
     
     def run(self, n_jobs = 1):
+        """
+        Runs the experiment over n_jobs processes.
+        
+        Parameters
+        ----------
+        n_jobs: number of processes to run
+        """
         
         if n_jobs == 1:
             results = [self._run_algorithm() for _ in range(self._n_runs)]

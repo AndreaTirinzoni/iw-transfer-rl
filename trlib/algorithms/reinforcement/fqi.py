@@ -61,7 +61,7 @@ class FQI(Algorithm):
         for _ in range(self._max_iterations):
             self._iter(data[:,1:self._r_idx], data[:,self._r_idx:self._s_idx], data[:,self._s_idx:-1], data[:,-1], **kwargs)
             
-        self._result.update_step(n_samples = data.shape[0])
+        self._result.update_step(n_episodes = self.n_episodes, n_samples = data.shape[0])
     
     def reset(self):
         

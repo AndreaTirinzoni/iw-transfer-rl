@@ -36,7 +36,10 @@ def eval_policy_callback(field_name, criterion = 'discounted', n_episodes = 1, i
     def fun(algorithm):
         
         perf = evaluate_policy(algorithm._mdp, algorithm._policy, criterion = criterion, n_episodes = n_episodes, initial_states = initial_states, n_threads = n_threads)
-        algorithm._result.steps[algorithm._step][field_name] = perf
+        fields = {}
+        fields[field_name + "_mean"] = perf[0]
+        fields[field_name + "_std"] = perf[1]
+        algorithm._result.update_step(**fields)
     
     return fun
 
@@ -58,7 +61,10 @@ def eval_greedy_policy_callback(field_name, criterion = 'discounted', n_episodes
         
         policy = EpsilonGreedy(algorithm._actions, algorithm._policy.Q, 0)
         perf = evaluate_policy(algorithm._mdp, policy, criterion = criterion, n_episodes = n_episodes, initial_states = initial_states, n_threads = n_threads)
-        algorithm._result.steps[algorithm._step][field_name] = perf
+        fields = {}
+        fields[field_name + "_mean"] = perf[0]
+        fields[field_name + "_std"] = perf[1]
+        algorithm._result.update_step(**fields)
     
     return fun
 
