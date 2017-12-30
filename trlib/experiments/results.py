@@ -48,6 +48,10 @@ class AlgorithmResult(Result):
     def add_step(self, **kwargs):
         self.steps.append(kwargs)
         
+    def update_step(self, **kwargs):
+        for name,value in kwargs.items():
+            self.steps[-1][name] = value
+        
 class ExperimentResult(Result):
     """
     A class to store the results of running an experiment

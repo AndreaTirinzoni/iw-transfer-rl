@@ -1,6 +1,5 @@
 import numpy as np
 from trlib.algorithms.algorithm import Algorithm
-from copy import deepcopy
 from gym import spaces
 from trlib.policies.qfunction import FittedQ, DiscreteFittedQ
 from trlib.policies.policy import Uniform
@@ -17,7 +16,7 @@ class FQI(Algorithm):
         Journal of Machine Learning Research 6.Apr (2005): 503-556
     """
     
-    def __init__(self, mdp, policy, actions, batch_size, max_iterations, regressor_type, verbose = False, **kwargs):
+    def __init__(self, mdp, policy, actions, batch_size, max_iterations, regressor_type, verbose = False, **regressor_params):
         
         super().__init__("FQI", mdp, policy, verbose)
         
@@ -26,12 +25,10 @@ class FQI(Algorithm):
         self._max_iterations = max_iterations
         self._regressor_type = regressor_type
         
-        regressor = regressor_type(**kwargs)
-        
         if isinstance(mdp.action_space, spaces.Discrete):
-            self._policy.Q = DiscreteFittedQ([deepcopy(regressor) for _ in actions], mdp.state_dim)
+            self._policy.Q = DiscreteFittedQ(regressor_type, mdp.state_dim, len(actions), **regressor_params)
         else:
-            self._policy.Q = FittedQ(regressor, mdp.state_dim, mdp.action_dim)
+            self._policy.Q = FittedQ(regressor_type, mdp.state_dim, mdp.action_dim, **regressor_params)
         
         self._a_idx = 1 + mdp.state_dim
         self._r_idx = self._a_idx + mdp.action_dim
@@ -39,7 +36,7 @@ class FQI(Algorithm):
         
         self.reset()
         
-    def _iter(self, sa, r, s_prime, absorbing, **kwargs):
+    def _iter(self, sa, r, s_prime, absorbing, **fit_params):
 
         self.display("Iteration {0}".format(self._iteration))
         
@@ -49,7 +46,7 @@ class FQI(Algorithm):
             maxq, _ = self._policy.Q.max(s_prime, self._actions, absorbing)
             y = r.ravel() + self._mdp.gamma * maxq
 
-        self._policy.Q.fit(sa, y.ravel(), **kwargs)
+        self._policy.Q.fit(sa, y.ravel(), **fit_params)
 
         self._iteration += 1
         
@@ -63,6 +60,8 @@ class FQI(Algorithm):
         
         for _ in range(self._max_iterations):
             self._iter(data[:,1:self._r_idx], data[:,self._r_idx:self._s_idx], data[:,self._s_idx:-1], data[:,-1], **kwargs)
+            
+        self._result.update_step(n_samples = data.shape[0])
     
     def reset(self):
         

@@ -1,4 +1,5 @@
 from trlib.utilities.evaluation import evaluate_policy
+from trlib.policies.valuebased import EpsilonGreedy
 
 def save_json_callback(file_name):
     """
@@ -39,7 +40,41 @@ def eval_policy_callback(field_name, criterion = 'discounted', n_episodes = 1, i
     
     return fun
 
+def eval_greedy_policy_callback(field_name, criterion = 'discounted', n_episodes = 1, initial_states = None, n_threads = 1):
+    """
+    Generates a callback for evaluating a policy that is greedy w.r.t. the algorithm's current Q-function
+    
+    Parameters
+    ----------
+    field_name: name of the field in the algorithm's Result object where to store the evaluation
+    others: see evaluation.py
+    
+    Returns
+    -------
+    A callback for an algorithm to evaluate performance
+    """
+    
+    def fun(algorithm):
+        
+        policy = EpsilonGreedy(algorithm._actions, algorithm._policy.Q, 0)
+        perf = evaluate_policy(algorithm._mdp, policy, criterion = criterion, n_episodes = n_episodes, initial_states = initial_states, n_threads = n_threads)
+        algorithm._result.steps[algorithm._step][field_name] = perf
+    
+    return fun
+
 def get_callbacks(callback_list):
+    """
+    Returns a list of callbacks given a list of callback specifications.
+    A list of callback specifications is a list of tuples (callback_name, **callback_params).
+    
+    Parameters
+    ----------
+    callback_list: a list of tuples (callback_name, **callback_params)
+    
+    Returns
+    -------
+    A list of callbacks
+    """
     
     callbacks = []
     
@@ -49,6 +84,17 @@ def get_callbacks(callback_list):
     return callbacks
 
 def get_callback_list_entry(name, **params):
+    """
+    Builds an entry of a callback specification, i.e., a tuple (callback_name, **callback_params)
     
+    Parameters
+    ----------
+    name: the name of a callback generator function
+    params: parameters to the callback generator function
+    
+    Returns
+    -------
+    A couple (name,params)
+    """
     return (name, params)
     

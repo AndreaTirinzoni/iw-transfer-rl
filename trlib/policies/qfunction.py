@@ -1,5 +1,6 @@
 import numpy as np
 from numpy import matlib
+from examples.test import regressor_params
 
 class QFunction:
     """
@@ -69,10 +70,9 @@ class FittedQ(QFunction):
     use DiscreteFittedQ instead.
     """
     
-    def __init__(self, regressor, state_dim, action_dim):
+    def __init__(self, regressor_type, state_dim, action_dim, **regressor_params):
         
-        assert hasattr(regressor, "predict")
-        self._regressor = regressor
+        self._regressor = regressor_type(**regressor_params)
         self._state_dim = state_dim
         self._action_dim = action_dim
         
@@ -119,9 +119,9 @@ class FittedQ(QFunction):
             
         return (max_vals,max_actions)
     
-    def fit(self, sa, q, **kwargs):
+    def fit(self, sa, q, **fit_params):
         
-        self._regressor.fit(sa, q, **kwargs)
+        self._regressor.fit(sa, q, **fit_params)
         
 class DiscreteFittedQ(QFunction):
     """
@@ -129,14 +129,11 @@ class DiscreteFittedQ(QFunction):
     one for each discrete action. This is only for discrete action-spaces.
     """
     
-    def __init__(self, regressor_list, state_dim):
-        
-        for r in regressor_list:
-            assert hasattr(r, "predict")
+    def __init__(self, regressor_type, state_dim, n_actions, **regressor_params):
             
-        self._regressors = regressor_list
+        self._regressors = [regressor_type(**regressor_params) for _ in range(n_actions)]
         self._state_dim = state_dim
-        self._n_actions = len(regressor_list)
+        self._n_actions = n_actions
         
     def __call__(self, state, action):
         
@@ -187,9 +184,9 @@ class DiscreteFittedQ(QFunction):
         
         return max_vals, max_actions
     
-    def fit(self, sa, q, **kwargs):
+    def fit(self, sa, q, **fit_params):
         
         for a in range(self._n_actions):
             mask = sa[:,-1] == a
-            self._regressors[a].fit(sa[mask, 0:-1], q[mask], **kwargs)
+            self._regressors[a].fit(sa[mask, 0:-1], q[mask], **fit_params)
     
