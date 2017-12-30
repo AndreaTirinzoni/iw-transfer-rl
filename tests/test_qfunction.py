@@ -15,7 +15,7 @@ class TestFittedQ(TestCase):
     
     def test_call(self):
         
-        Q = FittedQ(MockRegressor(np.sum), 3, 2)
+        Q = FittedQ(MockRegressor, 3, 2, fun = np.sum)
         
         self.assertEqual(15, Q(np.array([1,2,3]),np.array([4,5])))
         
@@ -27,7 +27,7 @@ class TestFittedQ(TestCase):
             
     def test_values(self):
         
-        Q = FittedQ(MockRegressor(np.sum), 3, 2)
+        Q = FittedQ(MockRegressor, 3, 2, fun = np.sum)
         
         sa = np.array([[1,2,3,4,5], [2,2,3,4,5], [3,2,3,4,5]])
         
@@ -38,7 +38,7 @@ class TestFittedQ(TestCase):
 
     def test_max(self):
         
-        Q = FittedQ(MockRegressor(np.sum), 3, 2)
+        Q = FittedQ(MockRegressor, 3, 2, fun = np.sum)
         
         states = np.array([[1,1,1],[2,2,2],[3,3,3],[4,4,4]])
         actions = [np.array([1,1]), np.array([2,2])]
@@ -56,8 +56,8 @@ class TestDiscreteFittedQ(TestCase):
     
     def test_call(self):
         
-        rs = [MockRegressor(np.sum), MockRegressor(np.prod)]
-        Q = DiscreteFittedQ(rs, 3)
+        Q = DiscreteFittedQ(MockRegressor, 3, 2, fun = np.sum)
+        Q._regressors[1] = MockRegressor(np.prod)
         
         self.assertEqual(7, Q(np.array([1,2,4]),0))
         self.assertEqual(8, Q(np.array([1,2,4]),1))
@@ -70,8 +70,8 @@ class TestDiscreteFittedQ(TestCase):
             
     def test_values(self):
         
-        rs = [MockRegressor(np.sum), MockRegressor(np.prod)]
-        Q = DiscreteFittedQ(rs, 3)
+        Q = DiscreteFittedQ(MockRegressor, 3, 2, fun = np.sum)
+        Q._regressors[1] = MockRegressor(np.prod)
         
         sa = np.array([[1,2,3,0], [2,2,3,1], [3,2,3,0]])
         
@@ -82,8 +82,8 @@ class TestDiscreteFittedQ(TestCase):
             
     def test_max(self):
         
-        rs = [MockRegressor(np.sum), MockRegressor(np.prod)]
-        Q = DiscreteFittedQ(rs, 3)
+        Q = DiscreteFittedQ(MockRegressor, 3, 2, fun = np.sum)
+        Q._regressors[1] = MockRegressor(np.prod)
         
         states = np.array([[1,1,1],[-2,2,2],[3,3,3],[-4,4,4]])
         absorbing = np.array([1,0,0,1])

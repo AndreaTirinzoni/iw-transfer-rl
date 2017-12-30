@@ -52,13 +52,15 @@ class QFunction:
         raise NotImplementedError
     
 class ZeroQ(QFunction):
+    """
+    A QFunction that is zero for every state-action couple.
+    """
     
     def __call__(self, state, action):
         return 0
     
     def values(self, sa):
         return np.zeros(np.shape(sa)[0])
-        
 
 class FittedQ(QFunction):
     """

@@ -47,7 +47,6 @@ def plot_average(results, x_name, y_name, title = "", x_label = "Episodes", y_la
     
     for result in results:
         runs = extract_runs_data(result.runs, [x_name, y_name])
-        print(runs)
         x.append(np.mean(runs[0].T,1))
         y_mean.append(np.mean(runs[1].T,1))
         y_std.append(np.std(runs[1].T,1) / np.sqrt(runs[1].shape[0]))

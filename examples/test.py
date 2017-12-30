@@ -9,7 +9,7 @@ from trlib.algorithms.callbacks import  eval_policy_callback, get_callback_list_
 import numpy as np
 from trlib.experiments.experiment import RepeatExperiment
 
-result_file = "results1.json"
+result_file = "results2.json"
 
 mdp = Dam(capacity = 500.0, demand = 10.0, flooding = 200.0, inflow_profile = 1, inflow_std = 4.0, alpha = 0.3, beta = 0.7)
 actions = [0, 3, 5, 7, 10, 15, 20, 30]
