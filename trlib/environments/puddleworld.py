@@ -56,10 +56,10 @@ class PuddleWorld(gym.Env):
         self._absorbing = False
         if state is None:
             self.pos = np.array([0., 0.])
+            self.pos = np.random.rand(2) * 10
         else:
-            assert isinstance(state, np.array)
-            self.pos = state
-        return np.array(self.pos)
+            self.pos = np.array(state)
+        return self.get_state()
 
     def isAtGoal(self):
         return np.linalg.norm(self.pos - self.goal) < self.fudge
@@ -77,14 +77,19 @@ class PuddleWorld(gym.Env):
             return norm_const * result
         else:
             raise NameError("The dimensions of the input don't match")
+        
+    def _get_puddle_weight(self, pos):
+        
+        weight = 0
+        for mu, inv_cov in self.puddles:
+            weight += self.mvnpdf(self.pos, mu, inv_cov)
+        return weight
 
     def step(self, a):
 
-        slow_factor = 0
-        for mu, inv_cov in self.puddles:
-            slow_factor += self.mvnpdf(self.pos, mu, inv_cov)
+        puddle_weight = self._get_puddle_weight(self.pos)
 
-        alpha = 1/(1+(5*slow_factor))
+        alpha = 1 / (1 + (5*puddle_weight))
 
         if int(a) == 0:
             self.pos[0] += alpha
@@ -100,10 +105,8 @@ class PuddleWorld(gym.Env):
         self.pos = self.pos.clip([0,0],self.size)
 
         base_reward = 0.0 if self.isAtGoal() else -1.0
+        base_reward += puddle_weight * self.puddle_penalty
 
-        for mu, inv_cov in self.puddles:
-            base_reward += self.mvnpdf(self.pos, mu, inv_cov) * self.puddle_penalty
-        
         if self.reward_noise > 0:
             base_reward += np.random.normal(scale=self.reward_noise)
 
@@ -111,36 +114,11 @@ class PuddleWorld(gym.Env):
             self._absorbing = True
         else:
             self._absorbing = False
-
-        #print(base_reward)
-        return self.pos, base_reward, self._absorbing, {}
+        
+        return self.get_state(), base_reward, self._absorbing, {}
 
     def get_state(self):
-        return self.pos
-
-    def _render(self, mode=None, close=None):
-        pass
-
-    def getNextState(self,pos,a):
-        slow_factor = 0
-        for mu, inv_cov in self.puddles:
-            slow_factor += self.mvnpdf(pos, mu, inv_cov)
-        alpha = 1/(1+(10*slow_factor))
-        if int(a) == 0:
-            pos[0] += alpha
-        elif int(a) == 1:
-            pos[0] -= alpha
-        elif int(a) == 2:
-            pos[1] += alpha
-        elif int(a) == 3:
-            pos[1] -= alpha
-        return pos
-
-    def getReward(self,pos):
-        base_reward = 0.0 if self.posIsAtGoal(pos) else -1.0
-        for mu, inv_cov in self.puddles:
-            base_reward += self.mvnpdf(pos, mu, inv_cov) * self.puddle_penalty
-        return base_reward
+        return np.array(self.pos)
 
 
     
