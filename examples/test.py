@@ -4,14 +4,12 @@ from trlib.policies.qfunction import ZeroQ
 from trlib.algorithms.reinforcement.fqi import FQI
 from sklearn.ensemble.forest import ExtraTreesRegressor
 from trlib.experiments.results import Result
-from trlib.experiments.visualization import plot_steps, plot_experiment,\
-    extract_runs_data
-from trlib.algorithms.callbacks import save_json_callback, eval_policy_callback,\
-    get_callback_list_entry, get_callbacks
+from trlib.experiments.visualization import plot_average
+from trlib.algorithms.callbacks import  eval_policy_callback, get_callback_list_entry
 import numpy as np
 from trlib.experiments.experiment import RepeatExperiment
 
-result_file = "results.json"
+result_file = "results1.json"
 
 mdp = Dam(capacity = 500.0, demand = 10.0, flooding = 200.0, inflow_profile = 1, inflow_std = 4.0, alpha = 0.3, beta = 0.7)
 actions = [0, 3, 5, 7, 10, 15, 20, 30]
@@ -33,10 +31,9 @@ callback_list = []
 callback_list.append(get_callback_list_entry("eval_policy_callback", field_name = "perf_disc", criterion = 'discounted', initial_states = [np.array([100.0,1]) for _ in range(5)]))
 callback_list.append(get_callback_list_entry("eval_policy_callback", field_name = "perf_avg", criterion = 'average', initial_states = [np.array([100.0,1]) for _ in range(5)]))
 
-experiment = RepeatExperiment("FQI Experiment", fqi, n_steps = 4, n_runs = 4, callback_list = callback_list, **fit_params)
+experiment = RepeatExperiment("FQI Experiment", fqi, n_steps = 10, n_runs = 8, callback_list = callback_list, **fit_params)
 result = experiment.run(4)
 result.save_json(result_file)
 
 result = Result.load_json(result_file)
-plot_experiment(result, x_name="n_episodes", y_name="perf_disc_mean")
-plot_experiment(result, x_name="n_episodes", y_name="perf_avg_mean")
+plot_average([result], "n_episodes", "perf_disc_mean", names = ["FQI"], file_name = "plot")
