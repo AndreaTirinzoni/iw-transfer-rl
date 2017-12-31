@@ -15,12 +15,16 @@ class Laroche2017(FQI):
     
     def __init__(self, mdp, policy, actions, batch_size, max_iterations, regressor_type, source_datasets, verbose = False, **regressor_params):
         
-        super().__init__(mdp, policy, actions, batch_size, max_iterations, regressor_type, verbose)
-        
-        self.n_source_mdps = len(source_datasets)
+        self._a_idx = 1 + mdp.state_dim
+        self._r_idx = self._a_idx + mdp.action_dim
+        self._s_idx = self._r_idx + 1
+        self._n_source_mdps = len(source_datasets)
         source_data = np.concatenate(source_datasets)
         self._source_sa = source_data[:,1:self._r_idx]
         self._source_s_prime = source_data[:,self._s_idx:-1]
+        self._source_absorbing = source_data[:,-1]
+        
+        super().__init__(mdp, policy, actions, batch_size, max_iterations, regressor_type, verbose, **regressor_params)
         
     def _step_core(self, **kwargs):
         
@@ -34,16 +38,16 @@ class Laroche2017(FQI):
         sa = np.concatenate((data[:,1:self._r_idx], self._source_sa))
         r = self._policy.Q.values(sa)
         s_prime = np.concatenate((data[:,self._s_idx:-1], self._source_s_prime))
-        absorbing = np.concatenate((data[:,-1], np.zeros(self._source_sa.shape[0])))
+        absorbing = np.concatenate((data[:,-1], self._source_absorbing))
         
         for _ in range(self._max_iterations-1):
             self._iter(sa, r, s_prime, absorbing, **kwargs)
             
-        self._result.update_step(n_episodes = self.n_episodes, n_samples = data.shape[0], n_eff = sa.shape[0])
+        self._result.update_step(n_episodes = self.n_episodes, n_target_samples = data.shape[0], n_source_samples = self._source_sa.shape[0], n_eff = sa.shape[0])
     
     def reset(self):
         
         super().reset()
         
-        self._result.add_fields(n_source_mdps = self.n_source_mdps, n_source_samples = self._source_sa.shape[0])
+        self._result.add_fields(n_source_mdps = self._n_source_mdps, n_source_samples = self._source_sa.shape[0])
     
