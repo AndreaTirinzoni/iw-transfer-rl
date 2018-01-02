@@ -24,6 +24,7 @@ def _weights(target_sa, source_sa, delta_sa):
     w = _phi(dist, delta_sa)
     w = w.reshape(n_target,-1)
     w /= np.sum(w,1)[:, np.newaxis]
+    w[np.isnan(w)] = 0
     dist = dist.reshape(n_target,-1)
     
     return w, dist
@@ -33,16 +34,16 @@ def _compliance(w, target_s, target_r, target_s_prime, source_s, source_r, sourc
     n_target = target_r.shape[0]
     n_source = source_r.shape[0]
     
-    s_prime_t = matlib.repeat(target_s_prime, n_source, axis = 0)
-    s_prime_s = matlib.repmat(source_s_prime, n_target, 1).reshape(n_target*n_source,)
-    s_t = matlib.repeat(target_s, n_source, axis = 0)
-    s_s = matlib.repmat(source_s, n_target, 1).reshape(n_target*n_source,)
+    s_prime_t = matlib.repeat(target_s_prime, n_source, axis = 0).squeeze()
+    s_prime_s = matlib.repmat(source_s_prime, n_target, 1).reshape(n_target*n_source,-1).squeeze()
+    s_t = matlib.repeat(target_s, n_source, axis = 0).squeeze()
+    s_s = matlib.repmat(source_s, n_target, 1).reshape(n_target*n_source,-1).squeeze()
     
     phi = _phi(_distance(s_prime_t, s_t + (s_prime_s - s_s)), delta_s_prime)
     lambda_p = np.multiply(w, phi.reshape(n_target,-1))
     
-    r_t = matlib.repeat(target_r, n_source, axis = 0)
-    r_s = matlib.repmat(source_r, n_target, 1).reshape(n_target*n_source,)
+    r_t = matlib.repeat(target_r, n_source, axis = 0).squeeze()
+    r_s = matlib.repmat(source_r, n_target, 1).reshape(n_target*n_source,-1).squeeze()
     
     phi = _phi(_distance(r_t, r_s), delta_r)
     lambda_r = np.multiply(w, phi.reshape(n_target,-1))
@@ -138,7 +139,7 @@ class Lazaric2008(FQI):
                                              source_s, source_r, source_s_prime, self._prior[i], 
                                              self._delta_sa, self._delta_s_prime, self._delta_r, self._mu)
             compliances.append(comp)
-            relevances.append(rel)
+            relevances.append(rel / np.sum(rel))
             
         compliances = np.array(compliances)
         compliances /= np.sum(compliances)

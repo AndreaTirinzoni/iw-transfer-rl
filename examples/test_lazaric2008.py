@@ -29,10 +29,10 @@ regressor_params = {'n_estimators': 50,
                     'min_samples_split':20,
                     'min_samples_leaf': 2}
 
-source_data = [generate_episodes(mdp, Uniform(actions), 30) for mdp in source_mdps]
+source_data = [generate_episodes(mdp, Uniform(actions), 10) for mdp in source_mdps]
 
 algorithm = Lazaric2008(target_mdp, pi, actions, batch_size = 5, max_iterations = 60, regressor_type = ExtraTreesRegressor, source_datasets = source_data,
-                 delta_sa = 0.1, delta_s_prime = 0.1, delta_r = 0.1, mu = 0.8, n_sample_total = 43200, prior = None, verbose = True, **regressor_params)
+                 delta_sa = 0.1, delta_s_prime = 0.1, delta_r = 0.1, mu = 0.8, n_sample_total = 20000, prior = None, verbose = True, **regressor_params)
 
 fit_params = {}
 
@@ -41,7 +41,7 @@ callback_list.append(get_callback_list_entry("eval_policy_callback", field_name 
 callback_list.append(get_callback_list_entry("eval_policy_callback", field_name = "perf_avg", criterion = 'average', initial_states = [np.array([100.0,1]) for _ in range(5)]))
 
 experiment = RepeatExperiment("Lazaric Experiment", algorithm, n_steps = 10, n_runs = 4, callback_list = callback_list, **fit_params)
-result = experiment.run(4)
+result = experiment.run(1)
 result.save_json(result_file)
 
 result = Result.load_json(result_file)
