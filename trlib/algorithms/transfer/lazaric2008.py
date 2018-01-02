@@ -126,6 +126,8 @@ class Lazaric2008(FQI):
         self.n_episodes += self._batch_size
         target_data = np.concatenate(self._data)
         
+        self.display("Computing compliances and relevancies")
+        
         target_sa, target_r, target_s_prime, target_absorbing, target_s = self._split_data(target_data)
         compliances = []
         relevances = []
@@ -141,19 +143,23 @@ class Lazaric2008(FQI):
         compliances = np.array(compliances)
         compliances /= np.sum(compliances)
         
+        self.display("Sampling source data")
+        
         data = target_data
         
         for i in range(self._n_source_mdps):
             
             n = (self._n_sample_total - target_sa.shape[0]) * compliances[i]
             n = int(n)
-            idx = np.random.randint(low = 0, high = self._source_data[i].shape[0], size = n)
+            idx = np.random.choice(self._source_data[i].shape[0], size = n, replace = True, p = relevances[i])
             data = np.concatenate((data, self._source_data[i][idx,:]))
         
         self._iteration = 0
         
+        sa, r, s_prime, absorbing, _ = self._split_data(data)
+        
         for _ in range(self._max_iterations):
-            self._iter(data[:,1:self._r_idx], data[:,self._r_idx:self._s_idx], data[:,self._s_idx:-1], data[:,-1], **kwargs)
+            self._iter(sa, r, s_prime, absorbing, **kwargs)
             
         self._result.update_step(n_episodes = self.n_episodes, n_eff = data.shape[0], n_target_samples = target_data.shape[0],
                                  n_source_samples = data.shape[0] - target_data.shape[0], compliances = compliances.tolist())
@@ -162,11 +168,7 @@ class Lazaric2008(FQI):
         
         super().reset()
         
-        self._data = []
-        self._iteration = 0
-        
-        self._result.add_fields(batch_size=self._batch_size, max_iterations=self._max_iterations,
-                                regressor_type=str(self._regressor_type.__name__), policy = str(self._policy.__class__.__name__))
+        self._result.add_fields(n_source_mdps = self._n_source_mdps, n_sample_total = self._n_sample_total)
     
     
         
