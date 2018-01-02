@@ -1,6 +1,8 @@
 import numpy as np
 from numpy import matlib
 from trlib.algorithms.reinforcement.fqi import FQI
+from trlib.policies.policy import Uniform
+from trlib.utilities.interaction import generate_episodes
 
 def _distance(x, y):
     if x.ndim == 1:
@@ -93,7 +95,7 @@ class Lazaric2008(FQI):
     """
     
     def __init__(self, mdp, policy, actions, batch_size, max_iterations, regressor_type, source_datasets,
-                 delta_sa, delta_s_prime, delta_r, mu, prior = None, verbose = False, **regressor_params):
+                 delta_sa, delta_s_prime, delta_r, mu, n_sample_total, prior = None, verbose = False, **regressor_params):
         
 
         self._n_source_mdps = len(source_datasets)
@@ -103,6 +105,7 @@ class Lazaric2008(FQI):
         self._delta_s_prime = delta_s_prime
         self._delta_r = delta_r
         self._mu = mu
+        self._n_sample_total = n_sample_total
         
         super().__init__(mdp, policy, actions, batch_size, max_iterations, regressor_type, verbose, **regressor_params)
         
@@ -115,4 +118,55 @@ class Lazaric2008(FQI):
         s_idx = r_idx + 1
         
         return data[:,1:r_idx], data[:,r_idx:s_idx], data[:,s_idx:-1], data[:,-1], data[:,1:a_idx]
+    
+    def _step_core(self, **kwargs):
+        
+        policy = self._policy if self._step > 0 else Uniform(self._actions)
+        self._data.append(generate_episodes(self._mdp, policy, self._batch_size))
+        self.n_episodes += self._batch_size
+        target_data = np.concatenate(self._data)
+        
+        target_sa, target_r, target_s_prime, target_absorbing, target_s = self._split_data(target_data)
+        compliances = []
+        relevances = []
+        for i in range(self._n_source_mdps):
+            
+            source_sa, source_r, source_s_prime, source_absorbing, source_s = self._split_data(self._source_data[i])
+            comp,rel = _compliance_relevance(target_sa, target_s, target_r, target_s_prime, source_sa,
+                                             source_s, source_r, source_s_prime, self._prior[i], 
+                                             self._delta_sa, self._delta_s_prime, self._delta_r, self._mu)
+            compliances.append(comp)
+            relevances.append(rel)
+            
+        compliances = np.array(compliances)
+        compliances /= np.sum(compliances)
+        
+        data = target_data
+        
+        for i in range(self._n_source_mdps):
+            
+            n = (self._n_sample_total - target_sa.shape[0]) * compliances[i]
+            n = int(n)
+            idx = np.random.randint(low = 0, high = self._source_data[i].shape[0], size = n)
+            data = np.concatenate((data, self._source_data[i][idx,:]))
+        
+        self._iteration = 0
+        
+        for _ in range(self._max_iterations):
+            self._iter(data[:,1:self._r_idx], data[:,self._r_idx:self._s_idx], data[:,self._s_idx:-1], data[:,-1], **kwargs)
+            
+        self._result.update_step(n_episodes = self.n_episodes, n_eff = data.shape[0], n_target_samples = target_data.shape[0],
+                                 n_source_samples = data.shape[0] - target_data.shape[0], compliances = compliances.tolist())
+    
+    def reset(self):
+        
+        super().reset()
+        
+        self._data = []
+        self._iteration = 0
+        
+        self._result.add_fields(batch_size=self._batch_size, max_iterations=self._max_iterations,
+                                regressor_type=str(self._regressor_type.__name__), policy = str(self._policy.__class__.__name__))
+    
+    
         
