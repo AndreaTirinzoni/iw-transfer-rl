@@ -91,32 +91,28 @@ def generate_source(mdp, n_episodes, test_fraction, file_name, policy = None, po
     data = [source_samples, rw_pred, st_pred]
     save_object(data, file_name)
 
-def estimate_ideal_weights(target_mdp, source_mdps, source_data, weight_rw, weight_st, var_rw, var_st):
+def estimate_ideal_weights(target_mdp, source_mdps, source_data, var_rw, var_st):
     
     wr = []
     ws = []
     
     for k in range(len(source_mdps)):
         source_mdp = source_mdps[k]
-        source_s, source_a, source_r, source_s_prime, _, _ = split_data(source_data, source_mdp.state_dim, source_mdp.action_dim)
-        for i in range(source_s[k].shape[0]):
-            if weight_rw:
-                rw_mean_t = target_mdp.get_reward_mean(source_s[i], source_a[i])
-                rw_mean_s = source_mdp.get_reward_mean(source_s[i], source_a[i])
-                num = stats.norm.pdf(source_r[i], rw_mean_t, np.sqrt(var_rw))
-                denom = stats.norm.pdf(source_r[i], rw_mean_s, np.sqrt(var_rw))
-                wr.append(num / denom)
-            else:
-                wr.append(1.0)
+        _, source_s, source_a, source_r, source_s_prime, _, _ = split_data(source_data[k], source_mdp.state_dim, source_mdp.action_dim)
+        for i in range(source_s.shape[0]):
+            rw_mean_t = target_mdp.get_reward_mean(source_s[i], source_a[i])
+            rw_mean_s = source_mdp.get_reward_mean(source_s[i], source_a[i])
+            num = stats.norm.pdf(source_r[i], rw_mean_t, np.sqrt(var_rw))
+            denom = stats.norm.pdf(source_r[i], rw_mean_s, np.sqrt(var_rw))
+            wr.append(num / denom)
             
             st_mean_t = target_mdp.get_transition_mean(source_s[i], source_a[i])
             st_mean_s = source_mdp.get_transition_mean(source_s[i], source_a[i])
             w_st = 1.0
             for d in range(source_s_prime.shape[1]):
-                if weight_st[d]:
-                    num = stats.norm.pdf(source_s_prime[i,d], st_mean_t[d], np.sqrt(var_st))
-                    denom = stats.norm.pdf(source_s_prime[i,d], st_mean_s[d], np.sqrt(var_st))
-                    w_st *= (num / denom)
+                num = stats.norm.pdf(source_s_prime[i,d], st_mean_t[d], np.sqrt(var_st))
+                denom = stats.norm.pdf(source_s_prime[i,d], st_mean_s[d], np.sqrt(var_st))
+                w_st *= (num / denom)
             ws.append(w_st)
             
     return np.array(wr), np.array(ws)

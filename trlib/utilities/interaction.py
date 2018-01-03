@@ -57,15 +57,18 @@ def split_data(data, state_dim, action_dim):
     """
     Splits the data into (t,s,a,r,s_prime,absorbing,sa)
     """
+    
+    assert data.shape[1] == 3 + 2*state_dim + action_dim
+    
     a_idx = 1 + state_dim
     r_idx = a_idx + action_dim
     s_idx = r_idx + 1
     
     t = data[:,0]
-    s = data[:,1:a_idx]
-    a = data[:,a_idx:r_idx]
+    s = data[:,1:a_idx].squeeze()
+    a = data[:,a_idx:r_idx].squeeze()
     r = data[:,r_idx]
-    s_prime = data[:,s_idx:-1]
+    s_prime = data[:,s_idx:-1].squeeze()
     absorbing = data[:,-1]
     sa = data[:,1:r_idx]
     
