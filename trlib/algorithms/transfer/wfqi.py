@@ -147,7 +147,7 @@ class WFQI(FQI):
                 
                 if self._weight_st[d]:
                     mu_gp_t, std_gp_t = _predict_gp(gp_s, self._source_sa[k])
-                    mu_gp_s, std_gp_s = self._source_predictions_st[d][k]
+                    mu_gp_s, std_gp_s = self._source_predictions_st[k][d]
                     samples = self._source_s_prime[k] if self._source_s_prime[k].ndim == 1 else self._source_s_prime[k][:,d]
                     w.append(self._weight_estimator(samples, mu_gp_t, std_gp_t, mu_gp_s, std_gp_s, self._var_st, self._max_weight))
                 else:
