@@ -109,16 +109,6 @@ class Lazaric2008(FQI):
         self._n_sample_total = n_sample_total
         
         super().__init__(mdp, policy, actions, batch_size, max_iterations, regressor_type, verbose, **regressor_params)
-        
-    def _split_data(self, data):
-        """
-        Splits the data into (sa,r,s_prime,absorbing, s)
-        """
-        a_idx = 1 + self._mdp.state_dim
-        r_idx = a_idx + self._mdp.action_dim
-        s_idx = r_idx + 1
-        
-        return data[:,1:r_idx], data[:,r_idx:s_idx], data[:,s_idx:-1], data[:,-1], data[:,1:a_idx]
     
     def _step_core(self, **kwargs):
         

@@ -60,53 +60,144 @@ def _predict_gp(gp, X, subtract_noise = False):
     if subtract_noise:
         std_gp = std_gp - np.min(std_gp)
     return mu_gp, std_gp
-
+    
 class WFQI(FQI):
     """
     Weighted Fitted Q-Iteration
     """
     
     def __init__(self, mdp, policy, actions, batch_size, max_iterations, regressor_type, source_datasets, var_rw, var_st, max_gp,
-                 max_weight = 1000, kernel_rw = None, kernel_st = None, verbose = False, **regressor_params):
+                 weight_estimator = estimate_weights_mean, max_weight = 1000, kernel_rw = None, kernel_st = None, weight_rw = True, weight_st = [True],
+                 verbose = False, **regressor_params):
         
         self._var_rw = var_rw
         self._var_st = var_st
         self._max_gp = max_gp
+        self._weight_estimator = weight_estimator
         self._max_weight = max_weight
         self._kernel_rw = kernel_rw
         self._kernel_st = kernel_st
-        self.n_source_mdps = len(source_datasets)
+        self._weight_rw = weight_rw
+        self._weight_st = weight_st
+        self._n_source_mdps = len(source_datasets)
         
         self._source_predictions_rw = []
         self._source_predictions_st = []
-        self._source_samples = []
+        self._source_sa = []
+        self._source_r = []
+        self._source_s_prime = []
+        self._source_absorbing = []
         
         for data in source_datasets:
             
-            self._source_samples.append(data[0])
+            sa, r, s_prime, absorbing, _ = self._split_data(data[0])
+            self._source_sa.append(sa)
+            self._source_r.append(r)
+            self._source_s_prime.append(s_prime)
+            self._source_absorbing.append(absorbing)
             self._source_predictions_rw.append(data[1])
             self._source_predictions_st.append(data[2])
         
         super().__init__(mdp, policy, actions, batch_size, max_iterations, regressor_type, verbose, **regressor_params)
+    
+    def _get_weighted_rw(self, target_sa, target_r, target_absorbing):
+        
+        if self._weight_rw:
+            gp_r = _fit_gp(target_sa, target_r, self._kernel_rw, self._max_gp)
+            
+        w_r = []
+        w_r.append(np.ones(target_sa.shape[0]))
+        
+        for k in range(self.n_source_mdps):
+            
+            if self._weight_rw:
+                mu_gp_t, std_gp_t = _predict_gp(gp_r, self._source_sa[k])
+                mu_gp_s, std_gp_s = self._source_predictions_rw[k]
+                w_r.append(self._weight_estimator(self._source_r[k], mu_gp_t, std_gp_t, mu_gp_s, std_gp_s, self._var_rw, self._max_weight))
+            else:
+                w_r.append(np.ones(self._source_r[k].shape[0]))
+        
+        w_r = np.concatenate(w_r, axis = 0)
+        
+        source_sa = np.concatenate(self._source_sa, axis = 0)
+        sa = np.concatenate((target_sa,source_sa), axis = 0)
+        
+        source_absorbing = np.concatenate(self._source_absorbing, axis = 0)
+        absorbing = np.concatenate((target_absorbing,source_absorbing), axis = 0)
+        
+        source_r = np.concatenate(self._source_r, axis = 0)
+        r = np.concatenate((target_r,source_r), axis = 0)
+        
+        return sa, r, absorbing, w_r
+    
+    def _get_weighted_st(self, target_sa, target_s_prime, target_absorbing):
+        
+        w_s = 1
+        
+        for d in range(self._mdp.state_dim):
+            
+            if self._weight_st[d]:
+                y = target_s_prime if target_s_prime.ndim == 1 else target_s_prime[:,d]
+                gp_s = _fit_gp(target_sa, y, self._kernel_st, self._max_gp)
+                
+            w = []
+            w.append(np.ones(target_sa.shape[0]))
+            
+            for k in range(self._n_source_mdps):
+                
+                if self._weight_st[d]:
+                    mu_gp_t, std_gp_t = _predict_gp(gp_s, self._source_sa[k])
+                    mu_gp_s, std_gp_s = self._source_predictions_st[d][k]
+                    samples = self._source_s_prime[k] if self._source_s_prime[k].ndim == 1 else self._source_s_prime[k][:,d]
+                    w.append(self._weight_estimator(samples, mu_gp_t, std_gp_t, mu_gp_s, std_gp_s, self._var_st, self._max_weight))
+                else:
+                    w.append(np.ones(self._source_s_prime[k].shape[0]))
+            
+            w = np.concatenate(w, axis = 0)
+            w_s *= w
+        
+        source_sa = np.concatenate(self._source_sa, axis = 0)
+        sa = np.concatenate((target_sa,source_sa), axis = 0)
+        
+        source_absorbing = np.concatenate(self._source_absorbing, axis = 0)
+        absorbing = np.concatenate((target_absorbing,source_absorbing), axis = 0)
+        
+        source_s_prime = np.concatenate(self._source_s_prime, axis = 0)
+        s_prime = np.concatenate((target_s_prime,source_s_prime), axis = 0)
+        
+        return sa, s_prime, absorbing, w_s
     
     def _step_core(self, **kwargs):
         
         policy = self._policy if self._step > 0 else Uniform(self._actions)
         self._data.append(generate_episodes(self._mdp, policy, self._batch_size))
         self.n_episodes += self._batch_size
-        data = np.concatenate(self._data)
+        target_data = np.concatenate(self._data)
+        
         self._iteration = 0
         
-        self._iter(data[:,1:self._r_idx], data[:,self._r_idx:self._s_idx], data[:,self._s_idx:-1], data[:,-1], **kwargs)
-        sa = np.concatenate((data[:,1:self._r_idx], self._source_sa))
+        target_sa, target_r, target_s_prime, target_absorbing, _ = self._split_data(target_data)
+        sa, r, absorbing, wr = self._get_weighted_rw(target_sa, target_r, target_absorbing)
+        fit_params = {'sample_weight': wr}
+        self._iter(sa, r, [], absorbing, **fit_params)
+        
+        sa, s_prime, absorbing, ws = self._get_weighted_st(target_sa, target_s_prime, target_absorbing)
         r = self._policy.Q.values(sa)
-        s_prime = np.concatenate((data[:,self._s_idx:-1], self._source_s_prime))
-        absorbing = np.concatenate((data[:,-1], self._source_absorbing))
+        fit_params = {'sample_weight': ws}
         
         for _ in range(self._max_iterations-1):
-            self._iter(sa, r, s_prime, absorbing, **kwargs)
+            self._iter(sa, r, s_prime, absorbing, **fit_params)
             
-        self._result.update_step(n_episodes = self.n_episodes, n_target_samples = data.shape[0], n_source_samples = self._source_sa.shape[0], n_eff = sa.shape[0])
+        wr_mean = np.mean(wr)
+        ws_mean = np.mean(ws)
+        wr_mean2 = np.mean(np.multiply(wr,wr))
+        ws_mean2 = np.mean(np.multiply(ws,ws))
+        wr_eff = wr.shape[0] * wr_mean ** 2 / wr_mean2
+        ws_eff = ws.shape[0] * ws_mean ** 2 / ws_mean2   
+        
+        self._result.update_step(n_episodes = self.n_episodes, n_target_samples = target_data.shape[0], 
+                                 n_source_samples = sa.shape[0] - target_data.shape[0], wr_mean = wr_mean,
+                                 ws_mean = ws_mean, wr_eff = wr_eff, ws_eff = ws_eff)
     
     def reset(self):
         

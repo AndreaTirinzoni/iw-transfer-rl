@@ -36,6 +36,16 @@ class FQI(Algorithm):
         
         self.reset()
         
+    def _split_data(self, data):
+        """
+        Splits the data into (sa,r,s_prime,absorbing, s)
+        """
+        a_idx = 1 + self._mdp.state_dim
+        r_idx = a_idx + self._mdp.action_dim
+        s_idx = r_idx + 1
+        
+        return data[:,1:r_idx], data[:,r_idx:s_idx], data[:,s_idx:-1], data[:,-1], data[:,1:a_idx]    
+        
     def _iter(self, sa, r, s_prime, absorbing, **fit_params):
 
         self.display("Iteration {0}".format(self._iteration))
