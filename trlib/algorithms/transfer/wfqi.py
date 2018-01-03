@@ -20,7 +20,7 @@ def estimate_weights_mean(samples, mu_gp_t, std_gp_t, mu_gp_s, std_gp_s, noise, 
             w[i]= (num / denom) * (noise / var_denom[i])
             w[i] = min(w[i], max_weight)
         else:
-            self.display("WARNING: discarding sample due to imprecise GP")
+            print("WARNING: discarding sample due to imprecise GP")
     
     return w
 

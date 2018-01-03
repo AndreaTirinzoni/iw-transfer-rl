@@ -52,3 +52,22 @@ def _single_episode(mdp, policy):
             break
     
     return episode[0:t,:]
+
+def split_data(data, state_dim, action_dim):
+    """
+    Splits the data into (t,s,a,r,s_prime,absorbing,sa)
+    """
+    a_idx = 1 + state_dim
+    r_idx = a_idx + action_dim
+    s_idx = r_idx + 1
+    
+    t = data[:,0]
+    s = data[:,1:a_idx]
+    a = data[:,a_idx:r_idx]
+    r = data[:,r_idx]
+    s_prime = data[:,s_idx:-1]
+    absorbing = data[:,-1]
+    sa = data[:,1:r_idx]
+    
+    return t,s,a,r,s_prime,absorbing,sa
+    
