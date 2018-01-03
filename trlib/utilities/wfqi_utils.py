@@ -7,7 +7,7 @@ from trlib.utilities.data import load_object, save_object
 from trlib.utilities.interaction import generate_episodes, split_data
 from scipy import stats
 
-def _fit_gp(X, X_train, X_test, y_train, y_test, kernel):
+def _fit_gp(X, X_train, X_test, y_train, y_test, kernel, subtract_noise):
       
     start = time.time()
     
@@ -28,6 +28,11 @@ def _fit_gp(X, X_train, X_test, y_train, y_test, kernel):
     print("Predicting")
     y_pred, std_pred = gp.predict(X, return_std=True)
     
+    if subtract_noise:
+        noise = np.sqrt(gp.kernel_.get_params()['k2__noise_level'])
+        assert noise <= np.min(std_pred)
+        std_pred = std_pred - noise
+    
     del gp
     
     end = time.time()
@@ -37,7 +42,9 @@ def _fit_gp(X, X_train, X_test, y_train, y_test, kernel):
     return (y_pred,std_pred)
 
 
-def generate_source(mdp, n_episodes, test_fraction, file_name, policy = None, policy_file_name = None, kernel_rw = None, kernel_st = None, load_data = False, fit_rw = True, fit_st = True):
+def generate_source(mdp, n_episodes, test_fraction, file_name, policy = None, policy_file_name = None, 
+                    kernel_rw = None, kernel_st = None, load_data = False, fit_rw = True, fit_st = True, 
+                    subtract_noise_rw = False, subtract_noise_st = False):
     """
     Generates source data for wfqi and fits the GPs
     
@@ -54,6 +61,8 @@ def generate_source(mdp, n_episodes, test_fraction, file_name, policy = None, po
     load_data: whether data should be loaded or generated
     fit_rw: whether the reward should be fitted
     fit_st: whether the state should be fitted
+    subtract_noise_rw: whether the noise fitted by the reward GP should be subtracted
+    subtract_noise_st: whether the noise fitted by the transition GP should be subtracted
     """
     if load_data:
         print("Loading data")
@@ -78,7 +87,7 @@ def generate_source(mdp, n_episodes, test_fraction, file_name, policy = None, po
         print("Fitting reward GP")
         y = source_samples[:,r_idx]
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = test_fraction)
-        rw_pred = _fit_gp(X, X_train, X_test, y_train, y_test, kernel_rw)
+        rw_pred = _fit_gp(X, X_train, X_test, y_train, y_test, kernel_rw, subtract_noise_rw)
     
     if fit_st:
         st_pred = []
@@ -86,7 +95,7 @@ def generate_source(mdp, n_episodes, test_fraction, file_name, policy = None, po
             print("Fitting transition GP " + str(d))
             y = source_samples[:,(s_idx + d):(s_idx + d + 1)]
             X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = test_fraction)
-            st_pred.append(_fit_gp(X, X_train, X_test, y_train, y_test, kernel_st))
+            st_pred.append(_fit_gp(X, X_train, X_test, y_train, y_test, kernel_st, subtract_noise_st))
     
     data = [source_samples, rw_pred, st_pred]
     save_object(data, file_name)

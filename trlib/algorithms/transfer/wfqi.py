@@ -70,7 +70,7 @@ class WFQI(FQI):
     
     def __init__(self, mdp, policy, actions, batch_size, max_iterations, regressor_type, source_datasets, var_rw, var_st, max_gp,
                  weight_estimator = estimate_weights_mean, max_weight = 1000, kernel_rw = None, kernel_st = None, weight_rw = True, weight_st = [True],
-                 subtract_st_noise = False, wr = None, ws = None, verbose = False, **regressor_params):
+                 subtract_noise_rw = False, subtract_noise_st = False, wr = None, ws = None, verbose = False, **regressor_params):
         
         self._var_rw = var_rw
         self._var_st = var_st
@@ -81,7 +81,8 @@ class WFQI(FQI):
         self._kernel_st = kernel_st
         self._weight_rw = weight_rw
         self._weight_st = weight_st
-        self._subtract_st_noise = subtract_st_noise
+        self._subtract_noise_rw = subtract_noise_rw
+        self._subtract_noise_st = subtract_noise_st
         self._n_source_mdps = len(source_datasets)
         self._wr = wr
         self._ws = ws
@@ -121,7 +122,7 @@ class WFQI(FQI):
                 
                 if self._weight_rw:
                     self.display("Predicting reward GP for source " + str(k))
-                    mu_gp_t, std_gp_t = _predict_gp(gp_r, self._source_sa[k])
+                    mu_gp_t, std_gp_t = _predict_gp(gp_r, self._source_sa[k], subtract_noise = self._subtract_noise_rw)
                     mu_gp_s, std_gp_s = self._source_predictions_rw[k]
                     w_r.append(self._weight_estimator(self._source_r[k], mu_gp_t, std_gp_t, mu_gp_s, std_gp_s, self._var_rw, self._max_weight))
                 else:
@@ -164,7 +165,7 @@ class WFQI(FQI):
                     
                     if self._weight_st[d]:
                         self.display("Predicting transition GP " + str(d) + " for source " + str(k))
-                        mu_gp_t, std_gp_t = _predict_gp(gp_s, self._source_sa[k], subtract_noise = self._subtract_st_noise)
+                        mu_gp_t, std_gp_t = _predict_gp(gp_s, self._source_sa[k], subtract_noise = self._subtract_noise_st)
                         mu_gp_s, std_gp_s = self._source_predictions_st[k][d]
                         samples = self._source_s_prime[k] if self._source_s_prime[k].ndim == 1 else self._source_s_prime[k][:,d]
                         w.append(self._weight_estimator(samples, mu_gp_t, std_gp_t, mu_gp_s, std_gp_s, self._var_st, self._max_weight))
