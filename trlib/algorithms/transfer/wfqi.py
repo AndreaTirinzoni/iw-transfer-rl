@@ -70,7 +70,7 @@ class WFQI(FQI):
     
     def __init__(self, mdp, policy, actions, batch_size, max_iterations, regressor_type, source_datasets, var_rw, var_st, max_gp,
                  weight_estimator = estimate_weights_mean, max_weight = 1000, kernel_rw = None, kernel_st = None, weight_rw = True, weight_st = [True],
-                 subtract_st_noise = False, verbose = False, **regressor_params):
+                 subtract_st_noise = False, wr = None, ws = None, verbose = False, **regressor_params):
         
         self._var_rw = var_rw
         self._var_st = var_st
@@ -83,6 +83,8 @@ class WFQI(FQI):
         self._weight_st = weight_st
         self._subtract_st_noise = subtract_st_noise
         self._n_source_mdps = len(source_datasets)
+        self._wr = wr
+        self._ws = ws
         
         super().__init__(mdp, policy, actions, batch_size, max_iterations, regressor_type, verbose, **regressor_params)
         
@@ -105,22 +107,25 @@ class WFQI(FQI):
     
     def _get_weighted_rw(self, target_sa, target_r, target_absorbing):
         
-        if self._weight_rw:
-            self.display("Fitting reward GP")
-            gp_r = _fit_gp(target_sa, target_r, self._kernel_rw, self._max_gp)
-            
         w_r = []
         w_r.append(np.ones(target_sa.shape[0]))
         
-        for k in range(self._n_source_mdps):
-            
+        if self._wr is not None:
+            w_r.append(self._wr)
+        else:
             if self._weight_rw:
-                self.display("Predicting reward GP for source " + str(k))
-                mu_gp_t, std_gp_t = _predict_gp(gp_r, self._source_sa[k])
-                mu_gp_s, std_gp_s = self._source_predictions_rw[k]
-                w_r.append(self._weight_estimator(self._source_r[k], mu_gp_t, std_gp_t, mu_gp_s, std_gp_s, self._var_rw, self._max_weight))
-            else:
-                w_r.append(np.ones(self._source_r[k].shape[0]))
+                self.display("Fitting reward GP")
+                gp_r = _fit_gp(target_sa, target_r, self._kernel_rw, self._max_gp)
+            
+            for k in range(self._n_source_mdps):
+                
+                if self._weight_rw:
+                    self.display("Predicting reward GP for source " + str(k))
+                    mu_gp_t, std_gp_t = _predict_gp(gp_r, self._source_sa[k])
+                    mu_gp_s, std_gp_s = self._source_predictions_rw[k]
+                    w_r.append(self._weight_estimator(self._source_r[k], mu_gp_t, std_gp_t, mu_gp_s, std_gp_s, self._var_rw, self._max_weight))
+                else:
+                    w_r.append(np.ones(self._source_r[k].shape[0]))
         
         w_r = np.concatenate(w_r, axis = 0)
         
@@ -137,31 +142,37 @@ class WFQI(FQI):
     
     def _get_weighted_st(self, target_sa, target_s_prime, target_absorbing):
         
-        w_s = 1
-        
-        for d in range(self._mdp.state_dim):
+        if self._ws is not None:
+            w_s = []
+            w_s.append(np.ones(target_sa.shape[0]))
+            w_s.append(self._ws)
+            w_s = np.concatenate(w_s, axis = 0)
+        else:
+            w_s = 1
             
-            if self._weight_st[d]:
-                self.display("Fitting transition GP " + str(d))
-                y = target_s_prime if target_s_prime.ndim == 1 else target_s_prime[:,d]
-                gp_s = _fit_gp(target_sa, y, self._kernel_st, self._max_gp)
-                
-            w = []
-            w.append(np.ones(target_sa.shape[0]))
-            
-            for k in range(self._n_source_mdps):
+            for d in range(self._mdp.state_dim):
                 
                 if self._weight_st[d]:
-                    self.display("Predicting transition GP " + str(d) + " for source " + str(k))
-                    mu_gp_t, std_gp_t = _predict_gp(gp_s, self._source_sa[k], subtract_noise = self._subtract_st_noise)
-                    mu_gp_s, std_gp_s = self._source_predictions_st[k][d]
-                    samples = self._source_s_prime[k] if self._source_s_prime[k].ndim == 1 else self._source_s_prime[k][:,d]
-                    w.append(self._weight_estimator(samples, mu_gp_t, std_gp_t, mu_gp_s, std_gp_s, self._var_st, self._max_weight))
-                else:
-                    w.append(np.ones(self._source_s_prime[k].shape[0]))
-            
-            w = np.concatenate(w, axis = 0)
-            w_s *= w
+                    self.display("Fitting transition GP " + str(d))
+                    y = target_s_prime if target_s_prime.ndim == 1 else target_s_prime[:,d]
+                    gp_s = _fit_gp(target_sa, y, self._kernel_st, self._max_gp)
+                    
+                w = []
+                w.append(np.ones(target_sa.shape[0]))
+                
+                for k in range(self._n_source_mdps):
+                    
+                    if self._weight_st[d]:
+                        self.display("Predicting transition GP " + str(d) + " for source " + str(k))
+                        mu_gp_t, std_gp_t = _predict_gp(gp_s, self._source_sa[k], subtract_noise = self._subtract_st_noise)
+                        mu_gp_s, std_gp_s = self._source_predictions_st[k][d]
+                        samples = self._source_s_prime[k] if self._source_s_prime[k].ndim == 1 else self._source_s_prime[k][:,d]
+                        w.append(self._weight_estimator(samples, mu_gp_t, std_gp_t, mu_gp_s, std_gp_s, self._var_st, self._max_weight))
+                    else:
+                        w.append(np.ones(self._source_s_prime[k].shape[0]))
+                
+                w = np.concatenate(w, axis = 0)
+                w_s *= w
         
         source_sa = np.concatenate(self._source_sa, axis = 0)
         sa = np.concatenate((target_sa,source_sa), axis = 0)
