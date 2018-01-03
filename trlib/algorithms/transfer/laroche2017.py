@@ -1,6 +1,6 @@
 import numpy as np
 from trlib.algorithms.reinforcement.fqi import FQI
-from trlib.utilities.interaction import generate_episodes
+from trlib.utilities.interaction import generate_episodes, split_data
 from trlib.policies.policy import Uniform
 
 class Laroche2017(FQI):
@@ -15,14 +15,9 @@ class Laroche2017(FQI):
     
     def __init__(self, mdp, policy, actions, batch_size, max_iterations, regressor_type, source_datasets, verbose = False, **regressor_params):
         
-        self._a_idx = 1 + mdp.state_dim
-        self._r_idx = self._a_idx + mdp.action_dim
-        self._s_idx = self._r_idx + 1
         self._n_source_mdps = len(source_datasets)
         source_data = np.concatenate(source_datasets)
-        self._source_sa = source_data[:,1:self._r_idx]
-        self._source_s_prime = source_data[:,self._s_idx:-1]
-        self._source_absorbing = source_data[:,-1]
+        _,_,_,_,self._source_s_prime,self._source_absorbing,self._source_sa = split_data(source_data, mdp.state_dim, mdp.action_dim)
         
         super().__init__(mdp, policy, actions, batch_size, max_iterations, regressor_type, verbose, **regressor_params)
         
@@ -32,13 +27,15 @@ class Laroche2017(FQI):
         self._data.append(generate_episodes(self._mdp, policy, self._batch_size))
         self.n_episodes += self._batch_size
         data = np.concatenate(self._data)
-        self._iteration = 0
         
-        self._iter(data[:,1:self._r_idx], data[:,self._r_idx:self._s_idx], data[:,self._s_idx:-1], data[:,-1], **kwargs)
-        sa = np.concatenate((data[:,1:self._r_idx], self._source_sa))
+        self._iteration = 0
+        _,_,_,r,s_prime,absorbing,sa = split_data(data, self._mdp.state_dim, self._mdp.action_dim)
+        self._iter(sa, r, s_prime, absorbing, **kwargs)
+        
+        sa = np.concatenate((sa, self._source_sa))
         r = self._policy.Q.values(sa)
-        s_prime = np.concatenate((data[:,self._s_idx:-1], self._source_s_prime))
-        absorbing = np.concatenate((data[:,-1], self._source_absorbing))
+        s_prime = np.concatenate((s_prime, self._source_s_prime))
+        absorbing = np.concatenate((absorbing, self._source_absorbing))
         
         for _ in range(self._max_iterations-1):
             self._iter(sa, r, s_prime, absorbing, **kwargs)

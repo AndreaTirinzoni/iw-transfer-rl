@@ -3,7 +3,7 @@ from trlib.algorithms.algorithm import Algorithm
 from gym import spaces
 from trlib.policies.qfunction import FittedQ, DiscreteFittedQ
 from trlib.policies.policy import Uniform
-from trlib.utilities.interaction import generate_episodes
+from trlib.utilities.interaction import generate_episodes, split_data
 
 class FQI(Algorithm):
     """
@@ -30,21 +30,7 @@ class FQI(Algorithm):
         else:
             self._policy.Q = FittedQ(regressor_type, mdp.state_dim, mdp.action_dim, **regressor_params)
         
-        self._a_idx = 1 + mdp.state_dim
-        self._r_idx = self._a_idx + mdp.action_dim
-        self._s_idx = self._r_idx + 1
-        
         self.reset()
-        
-    def _split_data(self, data):
-        """
-        Splits the data into (sa,r,s_prime,absorbing, s)
-        """
-        a_idx = 1 + self._mdp.state_dim
-        r_idx = a_idx + self._mdp.action_dim
-        s_idx = r_idx + 1
-        
-        return data[:,1:r_idx], data[:,r_idx:s_idx], data[:,s_idx:-1], data[:,-1], data[:,1:a_idx]    
         
     def _iter(self, sa, r, s_prime, absorbing, **fit_params):
 
@@ -68,8 +54,10 @@ class FQI(Algorithm):
         data = np.concatenate(self._data)
         self._iteration = 0
         
+        _,_,_,r,s_prime,absorbing,sa = split_data(data, self._mdp.state_dim, self._mdp.action_dim)
+        
         for _ in range(self._max_iterations):
-            self._iter(data[:,1:self._r_idx], data[:,self._r_idx:self._s_idx], data[:,self._s_idx:-1], data[:,-1], **kwargs)
+            self._iter(sa, r, s_prime, absorbing, **kwargs)
             
         self._result.update_step(n_episodes = self.n_episodes, n_samples = data.shape[0])
     

@@ -2,7 +2,7 @@ import numpy as np
 from numpy import matlib
 from trlib.algorithms.reinforcement.fqi import FQI
 from trlib.policies.policy import Uniform
-from trlib.utilities.interaction import generate_episodes
+from trlib.utilities.interaction import generate_episodes, split_data
 
 def _distance(x, y):
     if x.ndim == 1:
@@ -119,12 +119,12 @@ class Lazaric2008(FQI):
         
         self.display("Computing compliances and relevancies")
         
-        target_sa, target_r, target_s_prime, target_absorbing, target_s = self._split_data(target_data)
+        _,target_s,_,target_r,target_s_prime,_,target_sa = split_data(target_data, self._mdp.state_dim, self._mdp.action_dim)
         compliances = []
         relevances = []
         for i in range(self._n_source_mdps):
             
-            source_sa, source_r, source_s_prime, source_absorbing, source_s = self._split_data(self._source_data[i])
+            _,source_s,_,source_r,source_s_prime,_,source_sa = split_data(self._source_data[i], self._mdp.state_dim, self._mdp.action_dim)
             comp,rel = _compliance_relevance(target_sa, target_s, target_r, target_s_prime, source_sa,
                                              source_s, source_r, source_s_prime, self._prior[i], 
                                              self._delta_sa, self._delta_s_prime, self._delta_r, self._mu)
@@ -147,7 +147,7 @@ class Lazaric2008(FQI):
         
         self._iteration = 0
         
-        sa, r, s_prime, absorbing, _ = self._split_data(data)
+        _,_,_,r,s_prime,absorbing,sa = split_data(data, self._mdp.state_dim, self._mdp.action_dim)
         
         for _ in range(self._max_iterations):
             self._iter(sa, r, s_prime, absorbing, **kwargs)

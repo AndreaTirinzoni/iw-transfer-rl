@@ -3,7 +3,7 @@ import scipy.stats as stats
 from trlib.algorithms.reinforcement.fqi import FQI
 from sklearn.gaussian_process.gpr import GaussianProcessRegressor
 from trlib.policies.policy import Uniform
-from trlib.utilities.interaction import generate_episodes
+from trlib.utilities.interaction import generate_episodes, split_data
 
 def estimate_weights_mean(samples, mu_gp_t, std_gp_t, mu_gp_s, std_gp_s, noise, max_weight):
     
@@ -97,7 +97,7 @@ class WFQI(FQI):
         
         for data in source_datasets:
             
-            sa, r, s_prime, absorbing, _ = self._split_data(data[0])
+            _,_,_,r,s_prime,absorbing,sa = split_data(data[0], self._mdp.state_dim, self._mdp.action_dim)
             self._source_sa.append(sa)
             self._source_r.append(r)
             self._source_s_prime.append(s_prime)
@@ -194,7 +194,7 @@ class WFQI(FQI):
         
         self._iteration = 0
         
-        target_sa, target_r, target_s_prime, target_absorbing, _ = self._split_data(target_data)
+        _,_,_,target_r,target_s_prime,target_absorbing,target_sa = split_data(target_data, self._mdp.state_dim, self._mdp.action_dim)
         sa, r, absorbing, wr = self._get_weighted_rw(target_sa, target_r, target_absorbing)
         fit_params = {'sample_weight': wr}
         self._iter(sa, r, [], absorbing, **fit_params)
