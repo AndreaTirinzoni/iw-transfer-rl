@@ -187,7 +187,13 @@ class DiscreteFittedQ(QFunction):
     
     def fit(self, sa, q, **fit_params):
         
+        params = dict(fit_params)
+        
         for a in range(self._n_actions):
             mask = sa[:,-1] == a
-            self._regressors[a].fit(sa[mask, 0:-1], q[mask], **fit_params)
+            if "sample_weight" in fit_params:
+                w = fit_params["sample_weight"]
+                w = w[mask]
+                params["sample_weight"] = w
+            self._regressors[a].fit(sa[mask, 0:-1], q[mask], **params)
     

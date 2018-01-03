@@ -32,7 +32,6 @@ callback_list.append(get_callback_list_entry("eval_policy_callback", field_name 
 callback_list.append(get_callback_list_entry("eval_greedy_policy_callback", field_name = "perf_disc_greedy", criterion = 'discounted', initial_states = [np.array([0.,0.]) for _ in range(5)]))
 
 pre_callback_list = []
-#pre_callback_list.append(get_callback_list_entry("eval_policy_pre_callback", policy = uniform_policy, field_name = "perf_disc", criterion = 'discounted', initial_states = [np.array([0.,0.]) for _ in range(5)]))
 #pre_callback_list.append(get_callback_list_entry("eval_policy_pre_callback", policy = uniform_policy, field_name = "perf_disc_greedy", criterion = 'discounted', initial_states = [np.array([0.,0.]) for _ in range(5)]))
 
 fit_params = {}
