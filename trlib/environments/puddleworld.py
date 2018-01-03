@@ -24,7 +24,8 @@ class PuddleWorld(gym.Env):
     }
 
     def __init__(self, goal_x=10, goal_y=10, puddle_means=[(1.0, 10.0), (1.0, 8.0), (6.0,6.0),(6.0,4.0)], 
-                 puddle_var=[(.8, 1.e-5, 1.e-5, .8), (.8, 1.e-5, 1.e-5, .8), (.8, 1.e-5, 1.e-5, .8),(.8, 1.e-5, 1.e-5, .8)]):
+                 puddle_var=[(.8, 1.e-5, 1.e-5, .8), (.8, 1.e-5, 1.e-5, .8), (.8, 1.e-5, 1.e-5, .8),(.8, 1.e-5, 1.e-5, .8)],
+                 puddle_slow = True):
 
         self.horizon = 50
         self.gamma = 0.99
@@ -36,6 +37,7 @@ class PuddleWorld(gym.Env):
         self.noise = 0.2
         self.reward_noise = 0.1
         self.fudge = 1.41
+        self.puddle_slow = 5 if puddle_slow else 0
 
         self.puddle_penalty = -100.0
         self.puddle_means = list(map(np.array, puddle_means))
@@ -47,8 +49,6 @@ class PuddleWorld(gym.Env):
 
         self.action_space = spaces.Discrete(4)
 
-        self.pos = np.array([0., 0.])
-
         self.seed()
         self.reset()
 
@@ -56,15 +56,11 @@ class PuddleWorld(gym.Env):
         self._absorbing = False
         if state is None:
             self.pos = np.array([0., 0.])
-            self.pos = np.random.rand(2) * 10
         else:
             self.pos = np.array(state)
         return self.get_state()
 
-    def isAtGoal(self):
-        return np.linalg.norm(self.pos - self.goal) < self.fudge
-
-    def posIsAtGoal(self, pos):
+    def isAtGoal(self, pos):
         return np.linalg.norm(pos - self.goal) < self.fudge
 
     def mvnpdf(self, x, mu, sigma_inv):
@@ -82,14 +78,16 @@ class PuddleWorld(gym.Env):
         
         weight = 0
         for mu, inv_cov in self.puddles:
-            weight += self.mvnpdf(self.pos, mu, inv_cov)
+            weight += self.mvnpdf(pos, mu, inv_cov)
         return weight
 
     def step(self, a):
+        
+        s = self.get_state()
 
         puddle_weight = self._get_puddle_weight(self.pos)
 
-        alpha = 1 / (1 + (5*puddle_weight))
+        alpha = 1 / (1 + (self.puddle_slow * puddle_weight))
 
         if int(a) == 0:
             self.pos[0] += alpha
@@ -104,13 +102,13 @@ class PuddleWorld(gym.Env):
             self.pos += np.random.normal(scale=self.noise, size=(2,))
         self.pos = self.pos.clip([0,0],self.size)
 
-        base_reward = 0.0 if self.isAtGoal() else -1.0
+        base_reward = 0.0 if self.isAtGoal(s) else -1.0
         base_reward += puddle_weight * self.puddle_penalty
 
         if self.reward_noise > 0:
             base_reward += np.random.normal(scale=self.reward_noise)
 
-        if self.isAtGoal():
+        if self.isAtGoal(self.pos):
             self._absorbing = True
         else:
             self._absorbing = False
@@ -119,6 +117,28 @@ class PuddleWorld(gym.Env):
 
     def get_state(self):
         return np.array(self.pos)
+    
+    def get_reward_mean(self, s, a):
+        
+        puddle_weight = self._get_puddle_weight(s)
+        reward = 0.0 if self.isAtGoal(s) else -1.0
+        reward += puddle_weight * self.puddle_penalty
+        return reward
 
-
+    def get_transition_mean(self, s, a):
+        
+        puddle_weight = self._get_puddle_weight(s)
+        alpha = 1 / (1 + (self.puddle_slow * puddle_weight))
+        next_s = np.array(s)
+        
+        if int(a) == 0:
+            next_s[0] += alpha
+        elif int(a) == 1:
+            next_s[0] -= alpha
+        elif int(a) == 2:
+            next_s[1] += alpha
+        elif int(a) == 3:
+            next_s[1] -= alpha
+        
+        return next_s.clip([0,0],self.size)
     
