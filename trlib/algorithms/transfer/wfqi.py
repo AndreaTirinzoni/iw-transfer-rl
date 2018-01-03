@@ -20,7 +20,7 @@ def estimate_weights_mean(samples, mu_gp_t, std_gp_t, mu_gp_s, std_gp_s, noise, 
             w[i]= (num / denom) * (noise / var_denom[i])
             w[i] = min(w[i], max_weight)
         else:
-            print("WARNING: discarding sample due to imprecise GP")
+            self.display("WARNING: discarding sample due to imprecise GP")
     
     return w
 
@@ -84,6 +84,8 @@ class WFQI(FQI):
         self._subtract_st_noise = subtract_st_noise
         self._n_source_mdps = len(source_datasets)
         
+        super().__init__(mdp, policy, actions, batch_size, max_iterations, regressor_type, verbose, **regressor_params)
+        
         self._source_predictions_rw = []
         self._source_predictions_st = []
         self._source_sa = []
@@ -100,20 +102,20 @@ class WFQI(FQI):
             self._source_absorbing.append(absorbing)
             self._source_predictions_rw.append(data[1])
             self._source_predictions_st.append(data[2])
-        
-        super().__init__(mdp, policy, actions, batch_size, max_iterations, regressor_type, verbose, **regressor_params)
     
     def _get_weighted_rw(self, target_sa, target_r, target_absorbing):
         
         if self._weight_rw:
+            self.display("Fitting reward GP")
             gp_r = _fit_gp(target_sa, target_r, self._kernel_rw, self._max_gp)
             
         w_r = []
         w_r.append(np.ones(target_sa.shape[0]))
         
-        for k in range(self.n_source_mdps):
+        for k in range(self._n_source_mdps):
             
             if self._weight_rw:
+                self.display("Predicting reward GP for source " + str(k))
                 mu_gp_t, std_gp_t = _predict_gp(gp_r, self._source_sa[k])
                 mu_gp_s, std_gp_s = self._source_predictions_rw[k]
                 w_r.append(self._weight_estimator(self._source_r[k], mu_gp_t, std_gp_t, mu_gp_s, std_gp_s, self._var_rw, self._max_weight))
@@ -140,6 +142,7 @@ class WFQI(FQI):
         for d in range(self._mdp.state_dim):
             
             if self._weight_st[d]:
+                self.display("Fitting transition GP " + str(d))
                 y = target_s_prime if target_s_prime.ndim == 1 else target_s_prime[:,d]
                 gp_s = _fit_gp(target_sa, y, self._kernel_st, self._max_gp)
                 
@@ -149,6 +152,7 @@ class WFQI(FQI):
             for k in range(self._n_source_mdps):
                 
                 if self._weight_st[d]:
+                    self.display("Predicting transition GP " + str(d) + " for source " + str(k))
                     mu_gp_t, std_gp_t = _predict_gp(gp_s, self._source_sa[k], subtract_noise = self._subtract_st_noise)
                     mu_gp_s, std_gp_s = self._source_predictions_st[k][d]
                     samples = self._source_s_prime[k] if self._source_s_prime[k].ndim == 1 else self._source_s_prime[k][:,d]
