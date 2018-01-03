@@ -21,7 +21,7 @@ class RepeatExperiment(Experiment):
     functions is not accepted since it is not possible to pickle closures.
     """
     
-    def __init__(self, name, algorithm, n_steps, n_runs = 1, callback_list = [], **algorithm_params):
+    def __init__(self, name, algorithm, n_steps, n_runs = 1, callback_list = [], pre_callback_list = [], **algorithm_params):
         
         super().__init__(name)
         
@@ -29,6 +29,7 @@ class RepeatExperiment(Experiment):
         self._n_steps = n_steps
         self._n_runs = n_runs
         self._callback_list = callback_list
+        self._pre_callback_list = pre_callback_list
         self._algorithm_params = algorithm_params
         
         self._result = ExperimentResult(name, n_runs = n_runs)
@@ -39,7 +40,8 @@ class RepeatExperiment(Experiment):
             np.random.seed(seed)
         self._algorithm.reset()
         callbacks = get_callbacks(self._callback_list)
-        return self._algorithm.run(self._n_steps, callbacks, **self._algorithm_params)
+        pre_callbacks = get_callbacks(self._pre_callback_list)
+        return self._algorithm.run(self._n_steps, callbacks, pre_callbacks, **self._algorithm_params)
     
     def run(self, n_jobs = 1):
         """

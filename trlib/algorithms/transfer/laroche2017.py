@@ -23,7 +23,7 @@ class Laroche2017(FQI):
         
     def _step_core(self, **kwargs):
         
-        policy = self._policy if self._step > 0 else Uniform(self._actions)
+        policy = self._policy if self._step > 1 else Uniform(self._actions)
         self._data.append(generate_episodes(self._mdp, policy, self._batch_size))
         self.n_episodes += self._batch_size
         data = np.concatenate(self._data)

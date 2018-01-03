@@ -59,7 +59,7 @@ class Algorithm(object):
         """
         raise NotImplementedError
     
-    def run(self, n_steps, callbacks = [], **kwargs):
+    def run(self, n_steps, callbacks = [], pre_callbacks = [], **kwargs):
         """
         Runs the algorithm for n_steps.
                 
@@ -67,12 +67,16 @@ class Algorithm(object):
         ----------
         n_steps: the number of steps to run
         callbacks: a list of functions to be called with the algorithm as an input after each step
+        pre_callbacks: a list of functions to be called before running the algorithm
         kwargs: any other algorithm-dependent parameter
         
         Returns
         -------
         A Result object
         """
+        
+        for cb in pre_callbacks:
+            cb(self)
         
         for _ in range(n_steps):
             self.step(callbacks, **kwargs)
@@ -83,6 +87,6 @@ class Algorithm(object):
         """
         Resets the algorithm. Must be called by each overriding method before doing any other operation.
         """
-        self._step = 0
+        self._step = 1
         self.n_episodes = 0
         self._result = AlgorithmResult(self._name)

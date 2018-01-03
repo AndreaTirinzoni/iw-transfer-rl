@@ -68,6 +68,30 @@ def eval_greedy_policy_callback(field_name, criterion = 'discounted', n_episodes
     
     return fun
 
+def eval_policy_pre_callback(field_name, policy, criterion = 'discounted', n_episodes = 1, initial_states = None, n_threads = 1):
+    """
+    Generates a pre-callback for evaluating the uniform policy before starting the algorithm
+    
+    Parameters
+    ----------
+    field_name: name of the field in the algorithm's Result object where to store the evaluation
+    others: see evaluation.py
+    
+    Returns
+    -------
+    A callback for an algorithm to evaluate performance
+    """
+    
+    def fun(algorithm):
+        
+        perf = evaluate_policy(algorithm._mdp, policy, criterion = criterion, n_episodes = n_episodes, initial_states = initial_states, n_threads = n_threads)
+        fields = {}
+        fields[field_name + "_mean"] = perf[0]
+        fields[field_name + "_std"] = perf[1]
+        algorithm._result.add_step(step = 0, n_episodes = 0, **fields)
+    
+    return fun
+
 def get_callbacks(callback_list):
     """
     Returns a list of callbacks given a list of callback specifications.
