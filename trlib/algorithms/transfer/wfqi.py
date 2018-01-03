@@ -58,7 +58,9 @@ def _predict_gp(gp, X, subtract_noise = False):
     
     mu_gp, std_gp = gp.predict(X, return_std=True)
     if subtract_noise:
-        std_gp = std_gp - np.min(std_gp)
+        noise = np.sqrt(gp.kernel_.get_params()['k2__noise_level'])
+        assert noise <= np.min(std_gp)
+        std_gp = std_gp - noise
     return mu_gp, std_gp
     
 class WFQI(FQI):
@@ -68,7 +70,7 @@ class WFQI(FQI):
     
     def __init__(self, mdp, policy, actions, batch_size, max_iterations, regressor_type, source_datasets, var_rw, var_st, max_gp,
                  weight_estimator = estimate_weights_mean, max_weight = 1000, kernel_rw = None, kernel_st = None, weight_rw = True, weight_st = [True],
-                 verbose = False, **regressor_params):
+                 subtract_st_noise = False, verbose = False, **regressor_params):
         
         self._var_rw = var_rw
         self._var_st = var_st
@@ -79,6 +81,7 @@ class WFQI(FQI):
         self._kernel_st = kernel_st
         self._weight_rw = weight_rw
         self._weight_st = weight_st
+        self._subtract_st_noise = subtract_st_noise
         self._n_source_mdps = len(source_datasets)
         
         self._source_predictions_rw = []
@@ -146,7 +149,7 @@ class WFQI(FQI):
             for k in range(self._n_source_mdps):
                 
                 if self._weight_st[d]:
-                    mu_gp_t, std_gp_t = _predict_gp(gp_s, self._source_sa[k])
+                    mu_gp_t, std_gp_t = _predict_gp(gp_s, self._source_sa[k], subtract_noise = self._subtract_st_noise)
                     mu_gp_s, std_gp_s = self._source_predictions_st[k][d]
                     samples = self._source_s_prime[k] if self._source_s_prime[k].ndim == 1 else self._source_s_prime[k][:,d]
                     w.append(self._weight_estimator(samples, mu_gp_t, std_gp_t, mu_gp_s, std_gp_s, self._var_st, self._max_weight))
