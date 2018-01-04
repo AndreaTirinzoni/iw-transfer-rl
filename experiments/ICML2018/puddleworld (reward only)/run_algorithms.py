@@ -39,7 +39,7 @@ fit_params = {}
 max_iterations = 60
 batch_size = 10
 n_steps = 6
-n_runs = 1
+n_runs = 20
 n_jobs = 10
 
 """ --- FQI --- """
