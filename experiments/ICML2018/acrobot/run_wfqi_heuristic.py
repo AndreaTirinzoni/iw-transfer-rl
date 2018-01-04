@@ -15,7 +15,7 @@ from trlib.environments.acrobot import Acrobot
 target_mdp = Acrobot(m1 = 1.0, m2 = 1.0, l1 = 1.0, l2 = 1.0)
 
 actions = [0, 1]
-source_data = [load_object("source_data_" + str(i))[0] for i in [1,2,3]]
+source_data = [load_object("source_data_" + str(i)) for i in [1,2,3]]
 
 """ --- PARAMS --- """
 
