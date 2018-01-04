@@ -31,7 +31,7 @@ regressor_params = {'n_estimators': 50,
                     'min_samples_leaf': 1}
 
 callback_list = []
-callback_list.append(get_callback_list_entry("eval_policy_callback", field_name = "perf_disc", criterion = 'discounted', initial_states = [np.array([0.,0.]) for _ in range(5)]))
+#callback_list.append(get_callback_list_entry("eval_policy_callback", field_name = "perf_disc", criterion = 'discounted', initial_states = [np.array([0.,0.]) for _ in range(5)]))
 callback_list.append(get_callback_list_entry("eval_greedy_policy_callback", field_name = "perf_disc_greedy", criterion = 'discounted', initial_states = [np.array([0.,0.]) for _ in range(5)]))
 
 pre_callback_list = []
@@ -52,7 +52,7 @@ var_st = 0.2
 
 """ --- WFQI --- """
 
-pi = EpsilonGreedy(actions, ZeroQ(), 0.3)
+pi = EpsilonGreedy(actions, ZeroQ(), 1)
 
 kernel_rw = 1.0 * RBF(length_scale=1.0, length_scale_bounds=(0.01, 1000.0)) + WhiteKernel(noise_level = 1.0, noise_level_bounds=(0.01, 1.0))
 kernel_st = 1.0 * RBF(length_scale=1.0, length_scale_bounds=(0.01, 1000.0)) + WhiteKernel(noise_level = 1.0, noise_level_bounds=(0.01, 1.0))
