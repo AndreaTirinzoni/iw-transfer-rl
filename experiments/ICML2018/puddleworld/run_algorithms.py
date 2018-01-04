@@ -44,7 +44,7 @@ n_jobs = 10
 
 """ --- FQI --- """
 
-pi = EpsilonGreedy(actions, ZeroQ(), 1)
+pi = EpsilonGreedy(actions, ZeroQ(), 0.3)
 
 algorithm = FQI(target_mdp, pi, verbose = True, actions = actions, batch_size = batch_size, max_iterations = max_iterations, regressor_type = ExtraTreesRegressor, **regressor_params)
 
@@ -54,7 +54,7 @@ result.save_json("fqi.json")
 
 """ --- LAROCHE --- """
 
-pi = EpsilonGreedy(actions, ZeroQ(), 1)
+pi = EpsilonGreedy(actions, ZeroQ(), 0.3)
 
 algorithm = Laroche2017(target_mdp, pi, verbose = True, actions = actions, batch_size = batch_size, max_iterations = max_iterations, regressor_type = ExtraTreesRegressor, source_datasets=source_data, **regressor_params)
 
@@ -64,7 +64,7 @@ result.save_json("laroche2017.json")
 
 """ --- LAZARIC --- """
 
-pi = EpsilonGreedy(actions, ZeroQ(), 1)
+pi = EpsilonGreedy(actions, ZeroQ(), 0.3)
 
 algorithm = Lazaric2008(target_mdp, pi, actions, batch_size = batch_size, max_iterations = max_iterations, regressor_type = ExtraTreesRegressor, source_datasets = source_data,
                  delta_sa = 0.1, delta_s_prime = 0.1, delta_r = 0.1, mu = 0.8, n_sample_total = 3500, prior = None, verbose = True, **regressor_params)

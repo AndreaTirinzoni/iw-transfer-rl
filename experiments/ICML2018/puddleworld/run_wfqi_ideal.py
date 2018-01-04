@@ -59,7 +59,7 @@ wr,ws = estimate_ideal_weights(target_mdp, source_mdps, [data[0] for data in sou
 
 """ --- WFQI --- """
 
-pi = EpsilonGreedy(actions, ZeroQ(), 1)
+pi = EpsilonGreedy(actions, ZeroQ(), 0.3)
 
 algorithm = WFQI(target_mdp, pi, actions, batch_size = batch_size, max_iterations = max_iterations, regressor_type = ExtraTreesRegressor, source_datasets = source_data, var_rw = var_rw, var_st = var_st, max_gp = 4000,
                  weight_estimator = None, max_weight = 1000, kernel_rw = None, kernel_st = None, weight_rw = True, weight_st = [True, True],

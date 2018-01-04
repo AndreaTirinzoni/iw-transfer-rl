@@ -52,7 +52,7 @@ var_st = 0.2
 
 """ --- WFQI --- """
 
-pi = EpsilonGreedy(actions, ZeroQ(), 1)
+pi = EpsilonGreedy(actions, ZeroQ(), 0.3)
 
 kernel_rw = 1.0 * RBF(length_scale=1.0, length_scale_bounds=(0.01, 1000.0)) + WhiteKernel(noise_level = 1.0, noise_level_bounds=(0.01, 1.0))
 kernel_st = 1.0 * RBF(length_scale=1.0, length_scale_bounds=(0.01, 1000.0)) + WhiteKernel(noise_level = 1.0, noise_level_bounds=(0.01, 1.0))
