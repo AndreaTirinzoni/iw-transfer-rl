@@ -10,9 +10,9 @@ from trlib.utilities.data import save_object
 from trlib.utilities.evaluation import evaluate_policy
 from trlib.environments.acrobot import Acrobot
 
-source_mdp_1 = Acrobot(m1 = 1.0, m2 = 1.0, l1 = 1.0, l2 = 1.0)
-source_mdp_2 = Acrobot(m1 = 1.0, m2 = 1.0, l1 = 1.0, l2 = 1.0)
-source_mdp_3 = Acrobot(m1 = 1.0, m2 = 1.0, l1 = 1.0, l2 = 1.0)
+source_mdp_1 = Acrobot(m1 = 0.8, m2 = 0.8, l1 = 0.8, l2 = 0.8)
+source_mdp_2 = Acrobot(m1 = 0.8, m2 = 1.3, l1 = 0.9, l2 = 1.2)
+source_mdp_3 = Acrobot(m1 = 0.9, m2 = 0.6, l1 = 1.0, l2 = 0.5)
 target_mdp = Acrobot(m1 = 1.0, m2 = 1.0, l1 = 1.0, l2 = 1.0)
 
 mdp = target_mdp
@@ -41,8 +41,8 @@ result = experiment.run(1)
 plot_average([result], "n_episodes", "perf_disc_greedy_mean", names = ["FQI"])
 plot_average([result], "n_episodes", "n_samples", names = ["FQI"])
 
-#policy = EpsilonGreedy(actions, pi.Q, 0)
+policy = EpsilonGreedy(actions, pi.Q, 0)
 
-#print(evaluate_policy(mdp, policy, criterion = 'discounted', initial_states = [np.array([0., 0.]) for _ in range(5)]))
+print(evaluate_policy(mdp, policy, criterion = 'discounted', initial_states = initial_states))
 
-#save_object(policy, file_name)
+save_object(policy, file_name)
