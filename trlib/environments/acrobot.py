@@ -53,7 +53,7 @@ class Acrobot(gym.Env):
         self.reset()
 
     def step(self, a):
-        u = self.torques[a]
+        u = self.torques[int(a)]
         sa = np.append(self._state, u)
         new_state = odeint(self._dpds,
                            sa,
@@ -71,10 +71,10 @@ class Acrobot(gym.Env):
 
         self._state = x
 
-        reward = -1.0
+        reward = 0.0
         if d < 1:
             self._absorbing = True
-            reward = 0.0
+            reward = 1 - d
 
         return self.get_state(), reward, self._absorbing, {}
 
