@@ -44,7 +44,7 @@ result = experiment.run(1)
 plot_average([result], "n_episodes", "perf_disc_greedy_mean", names = ["FQI"])
 plot_average([result], "n_episodes", "n_samples", names = ["FQI"])
 
-policy = EpsilonGreedy(actions, pi.Q, 0)
+policy = EpsilonGreedy(actions, pi.Q, 0.1)
 
 print(evaluate_policy(mdp, policy, criterion = 'discounted', initial_states = [np.array([0., 0.]) for _ in range(5)]))
 
