@@ -59,8 +59,11 @@ def _predict_gp(gp, X, subtract_noise = False):
     mu_gp, std_gp = gp.predict(X, return_std=True)
     if subtract_noise:
         noise = np.sqrt(gp.kernel_.get_params()['k2__noise_level'])
-        assert noise <= np.min(std_gp)
-        std_gp = std_gp - noise
+        if noise <= np.min(std_gp):
+            std_gp = std_gp - noise
+        else:
+            std_gp = std_gp - np.min(std_gp)
+            print("WARNING: GP noise is greater than prediction variances")
     return mu_gp, std_gp
     
 class WFQI(FQI):
