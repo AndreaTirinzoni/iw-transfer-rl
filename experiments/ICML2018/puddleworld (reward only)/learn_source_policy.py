@@ -22,8 +22,8 @@ source_mdps = [source_mdp_1,source_mdp_2,source_mdp_3]
 target_mdp = PuddleWorld(goal_x=5,goal_y=10, puddle_means=[(1.0,4.0),(1.0, 10.0), (1.0, 8.0), (6.0,6.0),(6.0,4.0)], 
                                puddle_var=[(.7, 1.e-5, 1.e-5, .7), (.8, 1.e-5, 1.e-5, .8), (.8, 1.e-5, 1.e-5, .8), (.8, 1.e-5, 1.e-5, .8),(.8, 1.e-5, 1.e-5, .8)], puddle_slow = False)
 
-mdp = target_mdp
-file_name = "target_policy"
+mdp = source_mdp_3
+file_name = "source_policy_3"
 
 actions = [0, 1, 2, 3]
 pi = EpsilonGreedy(actions, ZeroQ(), 0.3)

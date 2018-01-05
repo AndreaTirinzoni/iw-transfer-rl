@@ -8,7 +8,6 @@ from trlib.experiments.experiment import RepeatExperiment
 from trlib.utilities.data import load_object
 from trlib.algorithms.transfer.wfqi import WFQI, estimate_weights_mean
 from sklearn.gaussian_process.kernels import RBF, WhiteKernel
-from trlib.experiments.visualization import plot_average
 from trlib.environments.puddleworld import PuddleWorld
 from trlib.utilities.wfqi_utils import estimate_ideal_weights
 from trlib.policies.policy import Uniform
@@ -51,7 +50,7 @@ var_st = 0.2
 
 """ --- WFQI --- """
 
-pi = EpsilonGreedy(actions, ZeroQ(), 1)
+pi = EpsilonGreedy(actions, ZeroQ(), 0.3)
 
 kernel_rw = 1.0 * RBF(length_scale=1.0, length_scale_bounds=(0.01, 1000.0)) + WhiteKernel(noise_level = 1.0, noise_level_bounds=(0.01, 1.0))
 kernel_st = 1.0 * RBF(length_scale=1.0, length_scale_bounds=(0.01, 1000.0)) + WhiteKernel(noise_level = 1.0, noise_level_bounds=(0.01, 1.0))
