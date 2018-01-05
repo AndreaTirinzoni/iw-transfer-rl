@@ -35,8 +35,10 @@ regressor_params = {'n_estimators': 50,
 
 fqi = FQI(mdp, pi, verbose = True, actions = actions, batch_size = 50, max_iterations = 60, regressor_type = ExtraTreesRegressor, **regressor_params)
 
+initial_states = [np.array([0.,0.]),np.array([2.5,0.]),np.array([5.,0.]),np.array([7.5,0.]),np.array([10.,0.])]
+
 callback_list = []
-callback_list.append(get_callback_list_entry("eval_greedy_policy_callback", field_name = "perf_disc_greedy", criterion = 'discounted', initial_states = [np.array([0., 0.]) for _ in range(5)]))
+callback_list.append(get_callback_list_entry("eval_greedy_policy_callback", field_name = "perf_disc_greedy", criterion = 'discounted', initial_states = initial_states))
 
 experiment = RepeatExperiment("FQI Experiment", fqi, n_steps = 5, n_runs = 1, callback_list = callback_list)
 result = experiment.run(1)
@@ -44,8 +46,8 @@ result = experiment.run(1)
 plot_average([result], "n_episodes", "perf_disc_greedy_mean", names = ["FQI"])
 plot_average([result], "n_episodes", "n_samples", names = ["FQI"])
 
-policy = EpsilonGreedy(actions, pi.Q, 0.1)
+policy = EpsilonGreedy(actions, pi.Q, 0)
 
-print(evaluate_policy(mdp, policy, criterion = 'discounted', initial_states = [np.array([0., 0.]) for _ in range(5)]))
+print(evaluate_policy(mdp, policy, criterion = 'discounted', initial_states = initial_states))
 
 save_object(policy, file_name)

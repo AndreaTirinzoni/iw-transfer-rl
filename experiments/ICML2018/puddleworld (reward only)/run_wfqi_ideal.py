@@ -35,9 +35,11 @@ regressor_params = {'n_estimators': 50,
                     'min_samples_split':2,
                     'min_samples_leaf': 1}
 
+initial_states = [np.array([0.,0.]),np.array([2.5,0.]),np.array([5.,0.]),np.array([7.5,0.]),np.array([10.,0.])]
+
 callback_list = []
 #callback_list.append(get_callback_list_entry("eval_policy_callback", field_name = "perf_disc", criterion = 'discounted', initial_states = [np.array([0.,0.]) for _ in range(5)]))
-callback_list.append(get_callback_list_entry("eval_greedy_policy_callback", field_name = "perf_disc_greedy", criterion = 'discounted', initial_states = [np.array([0.,0.]) for _ in range(5)]))
+callback_list.append(get_callback_list_entry("eval_greedy_policy_callback", field_name = "perf_disc_greedy", criterion = 'discounted', initial_states = initial_states))
 
 pre_callback_list = []
 #pre_callback_list.append(get_callback_list_entry("eval_policy_pre_callback", policy = uniform_policy, field_name = "perf_disc_greedy", criterion = 'discounted', initial_states = [np.array([0.,0.]) for _ in range(5)]))

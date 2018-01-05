@@ -22,8 +22,8 @@ source_mdps = [source_mdp_1,source_mdp_2,source_mdp_3]
 target_mdp = PuddleWorld(goal_x=5,goal_y=10, puddle_means=[(1.0,4.0),(1.0, 10.0), (1.0, 8.0), (6.0,6.0),(6.0,4.0)], 
                                puddle_var=[(.7, 1.e-5, 1.e-5, .7), (.8, 1.e-5, 1.e-5, .8), (.8, 1.e-5, 1.e-5, .8), (.8, 1.e-5, 1.e-5, .8),(.8, 1.e-5, 1.e-5, .8)], puddle_slow = True)
 
-mdp = target_mdp
-file_name = "target_policy"
+mdp = source_mdp_3
+file_name = "source_policy_3"
 
 actions = [0, 1, 2, 3]
 pi = EpsilonGreedy(actions, ZeroQ(), 0.3)
@@ -35,8 +35,10 @@ regressor_params = {'n_estimators': 50,
 
 fqi = FQI(mdp, pi, verbose = True, actions = actions, batch_size = 50, max_iterations = 60, regressor_type = ExtraTreesRegressor, **regressor_params)
 
+initial_states = [np.array([0.,0.]),np.array([2.5,0.]),np.array([5.,0.]),np.array([7.5,0.]),np.array([10.,0.])]
+
 callback_list = []
-callback_list.append(get_callback_list_entry("eval_greedy_policy_callback", field_name = "perf_disc_greedy", criterion = 'discounted', initial_states = [np.array([0., 0.]) for _ in range(5)]))
+callback_list.append(get_callback_list_entry("eval_greedy_policy_callback", field_name = "perf_disc_greedy", criterion = 'discounted', initial_states = initial_states))
 
 experiment = RepeatExperiment("FQI Experiment", fqi, n_steps = 5, n_runs = 1, callback_list = callback_list)
 result = experiment.run(1)
@@ -46,6 +48,6 @@ plot_average([result], "n_episodes", "n_samples", names = ["FQI"])
 
 policy = EpsilonGreedy(actions, pi.Q, 0)
 
-print(evaluate_policy(mdp, policy, criterion = 'discounted', initial_states = [np.array([0., 0.]) for _ in range(5)]))
+print(evaluate_policy(mdp, policy, criterion = 'discounted', initial_states = initial_states))
 
 save_object(policy, file_name)
