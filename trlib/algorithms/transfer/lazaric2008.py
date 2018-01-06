@@ -140,7 +140,7 @@ class Lazaric2008(FQI):
         
         for i in range(self._n_source_mdps):
             
-            n = (self._n_sample_total - target_sa.shape[0]) * compliances[i]
+            n = self._n_sample_total * compliances[i]
             n = int(n)
             idx = np.random.choice(self._source_data[i].shape[0], size = n, replace = True, p = relevances[i])
             data = np.concatenate((data, self._source_data[i][idx,:]))
