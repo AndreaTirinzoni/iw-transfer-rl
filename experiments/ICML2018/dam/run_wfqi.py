@@ -13,7 +13,7 @@ from sklearn.gaussian_process.kernels import RBF, WhiteKernel
 target_mdp = Dam(capacity = 500.0, demand = 10.0, flooding = 200.0, inflow_profile = 1, inflow_std = 4.0, alpha = 0.3, beta = 0.7)
 
 actions = [0, 3, 5, 7, 10, 15, 20, 30]
-source_data = [load_object("source_data_" + str(i))[0] for i in [1,2,3]]
+source_data = [load_object("source_data_" + str(i)) for i in [1,2,3]]
 
 """ --- PARAMS --- """
 
