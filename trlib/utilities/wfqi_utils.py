@@ -95,7 +95,7 @@ def generate_source(mdp, n_episodes, test_fraction, file_name, policy = None, po
             print("Fitting transition GP " + str(d))
             y = source_samples[:,(s_idx + d):(s_idx + d + 1)]
             X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = test_fraction)
-            st_pred.append(_fit_gp(X, X_train, X_test, y_train, y_test, kernel_st, subtract_noise_st))
+            st_pred.append(_fit_gp(X, X_train, X_test, y_train, y_test, kernel_st[d], subtract_noise_st))
     
     data = [source_samples, rw_pred, st_pred]
     save_object(data, file_name)

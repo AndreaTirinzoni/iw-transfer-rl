@@ -4,6 +4,7 @@ from trlib.algorithms.reinforcement.fqi import FQI
 from sklearn.gaussian_process.gpr import GaussianProcessRegressor
 from trlib.policies.policy import Uniform
 from trlib.utilities.interaction import generate_episodes, split_data
+from copy import deepcopy
 
 def estimate_weights_mean(samples, mu_gp_t, std_gp_t, mu_gp_s, std_gp_s, noise, max_weight):
     
@@ -81,7 +82,13 @@ class WFQI(FQI):
         self._weight_estimator = weight_estimator
         self._max_weight = max_weight
         self._kernel_rw = kernel_rw
-        self._kernel_st = kernel_st
+        
+        if isinstance(kernel_st, list):
+            assert len(kernel_st) == mdp.state_dim
+            self._kernel_st = kernel_st
+        else:
+            self._kernel_st = [deepcopy(kernel_st) for _ in range(mdp.state_dim)]
+        
         self._weight_rw = weight_rw
         self._weight_st = weight_st
         self._subtract_noise_rw = subtract_noise_rw
@@ -159,7 +166,7 @@ class WFQI(FQI):
                 if self._weight_st[d]:
                     self.display("Fitting transition GP " + str(d))
                     y = target_s_prime if target_s_prime.ndim == 1 else target_s_prime[:,d]
-                    gp_s = _fit_gp(target_sa, y, self._kernel_st, self._max_gp)
+                    gp_s = _fit_gp(target_sa, y, self._kernel_st[d], self._max_gp)
                     
                 w = []
                 w.append(np.ones(target_sa.shape[0]))

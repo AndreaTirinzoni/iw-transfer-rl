@@ -1,0 +1,5 @@
+k1 = ConstantKernel(1.59**2, constant_value_bounds="fixed") * RBF(length_scale=1.86, length_scale_bounds="fixed")
+k2 = ConstantKernel(1.89**2, constant_value_bounds="fixed") * RBF(length_scale=1.17, length_scale_bounds="fixed")
+k3 = ConstantKernel(2.5**2, constant_value_bounds="fixed") * RBF(length_scale=2.89, length_scale_bounds="fixed")
+k4 = ConstantKernel(3.14**2, constant_value_bounds="fixed") * RBF(length_scale=2.76, length_scale_bounds="fixed")
+kernel_st = [k1,k2,k3,k4]
