@@ -10,13 +10,12 @@ from trlib.utilities.data import save_object
 from trlib.utilities.evaluation import evaluate_policy
 from trlib.environments.acrobot_gym import AcrobotGym
 
-source_mdp_1 = AcrobotGym(m1 = 0.8, m2 = 0.8, l1 = 0.8, l2 = 0.8)
-source_mdp_2 = AcrobotGym(m1 = 0.8, m2 = 1.3, l1 = 0.9, l2 = 1.2)
-source_mdp_3 = AcrobotGym(m1 = 0.9, m2 = 0.6, l1 = 1.0, l2 = 0.5)
-target_mdp = AcrobotGym(m1 = 1.0, m2 = 1.0, l1 = 1.0, l2 = 1.0)
+source_mdp_1 = AcrobotGym(m1 = 0.8, m2 = 1.3, l1 = 0.7, l2 = 1.2) # -112 on target (-145 from vertical)
+source_mdp_2 = AcrobotGym(m1 = 1.2, m2 = 0.6, l1 = 1.1, l2 = 0.5) # -110 on target (-319 from vertical)
+target_mdp = AcrobotGym(m1 = 1.0, m2 = 1.0, l1 = 1.0, l2 = 1.0) # -70 (-110 from vertical)
 
-mdp = source_mdp_3
-file_name = "source_policy_3"
+mdp = target_mdp
+file_name = "target_policy"
 
 actions = [0, 1, 2]
 pi = EpsilonGreedy(actions, ZeroQ(), 0.1)

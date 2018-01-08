@@ -15,7 +15,7 @@ from trlib.environments.acrobot_gym import AcrobotGym
 target_mdp = AcrobotGym(m1 = 1.0, m2 = 1.0, l1 = 1.0, l2 = 1.0)
 
 actions = [0, 1, 2]
-source_data = [load_object("source_data_" + str(i))[0] for i in [1,2,3]]
+source_data = [load_object("source_data_" + str(i))[0] for i in [1,2]]
 
 """ --- PARAMS --- """
 
@@ -29,7 +29,7 @@ initial_states = [np.array([-2.0,0.,0.,0.]),np.array([-1.5,0.,0.,0.]),np.array([
                   np.array([1.0,0.,0.,0.]),np.array([1.5,0.,0.,0.]),np.array([2.0,0.,0.,0.])]
 
 callback_list = []
-callback_list.append(get_callback_list_entry("eval_greedy_policy_callback", field_name = "perf_disc_greedy", criterion = 'discounted', initial_states = initial_states))
+callback_list.append(get_callback_list_entry("eval_greedy_policy_callback", field_name = "perf_disc_greedy", criterion = 'discounted', n_episodes = 5))
 
 pre_callback_list = []
 
@@ -37,7 +37,7 @@ fit_params = {}
 
 max_iterations = 100
 batch_size = 5
-n_steps = 10
+n_steps = 6
 n_runs = 20
 n_jobs = 10
 
@@ -66,7 +66,7 @@ result.save_json("laroche2017.json")
 pi = EpsilonGreedy(actions, ZeroQ(), 0.1)
 
 algorithm = Lazaric2008(target_mdp, pi, actions, batch_size = batch_size, max_iterations = max_iterations, regressor_type = ExtraTreesRegressor, source_datasets = source_data,
-                 delta_sa = 0.1, delta_s_prime = 0.1, delta_r = 0.1, mu = 0.8, n_sample_total = 5000, prior = None, verbose = True, **regressor_params)
+                 delta_sa = 0.1, delta_s_prime = 0.1, delta_r = 0.1, mu = 0.8, n_sample_total = 6000, prior = None, verbose = True, **regressor_params)
 
 experiment = RepeatExperiment("lazaric2008", algorithm, n_steps = n_steps, n_runs = n_runs, callback_list = callback_list, pre_callback_list = pre_callback_list, **fit_params)
 result = experiment.run(n_jobs)
