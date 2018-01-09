@@ -17,6 +17,6 @@ k3 = ConstantKernel(6.08**2, constant_value_bounds="fixed") * RBF(length_scale=[
 k4 = ConstantKernel(10.4**2, constant_value_bounds="fixed") * RBF(length_scale=[2.96, 0.324, 2.08, 1.18, 1.82], length_scale_bounds="fixed")
 kernel_st =  [k1,k2,k3,k4]
 
-generate_source(mdp, n_episodes = 20, test_fraction = 0, file_name = file_name, policy = None,
+generate_source(mdp, n_episodes = 30, test_fraction = 0, file_name = file_name, policy = None,
                 policy_file_name = policy_file, kernel_rw = None, kernel_st = kernel_st, 
                 load_data = False, fit_rw = False, fit_st = True, subtract_noise_rw=False, subtract_noise_st=False)
