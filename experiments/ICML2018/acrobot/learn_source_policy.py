@@ -15,8 +15,8 @@ source_mdp_2 = Acrobot(m1 = 0.8, m2 = 1.3, l1 = 0.9, l2 = 1.2)
 source_mdp_3 = Acrobot(m1 = 0.9, m2 = 0.6, l1 = 1.0, l2 = 0.5)
 target_mdp = Acrobot(m1 = 1.0, m2 = 1.0, l1 = 1.0, l2 = 1.0)
 
-mdp = target_mdp
-file_name = "target_policy"
+mdp = source_mdp_3
+file_name = "source_policy_3"
 
 actions = [0, 1]
 pi = EpsilonGreedy(actions, ZeroQ(), 0.1)

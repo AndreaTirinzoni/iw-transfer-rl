@@ -7,7 +7,7 @@ import numpy as np
 from trlib.experiments.experiment import RepeatExperiment
 from trlib.utilities.data import load_object
 from trlib.algorithms.transfer.wfqi import WFQI, estimate_weights_mean
-from sklearn.gaussian_process.kernels import RBF
+from sklearn.gaussian_process.kernels import RBF, ConstantKernel
 from trlib.policies.policy import Uniform
 from trlib.environments.acrobot import Acrobot
 
@@ -45,15 +45,19 @@ n_jobs = 5
 
 """ --- WEIGHTS --- """
 
-var_st = 0.5
+var_st = 0.8
 
 """ --- WFQI --- """
 
 pi = EpsilonGreedy(actions, ZeroQ(), 0.1)
 
-kernel_st =  1.0 * RBF(length_scale=np.array([1.0,1.0,1.0,1.0,1.0]), length_scale_bounds=(0.01,10.0))
+k1 = ConstantKernel(2.45**2, constant_value_bounds="fixed") * RBF(length_scale=[0.488, 0.274, 3.57, 3.77, 2.14], length_scale_bounds="fixed")
+k2 = ConstantKernel(1.99**2, constant_value_bounds="fixed") * RBF(length_scale=[3.92, 0.507, 4.27, 1.22, 0.39], length_scale_bounds="fixed")
+k3 = ConstantKernel(6.08**2, constant_value_bounds="fixed") * RBF(length_scale=[2.02, 0.662, 0.998, 3.25, 0.000167], length_scale_bounds="fixed")
+k4 = ConstantKernel(10.4**2, constant_value_bounds="fixed") * RBF(length_scale=[2.96, 0.324, 2.08, 1.18, 1.82], length_scale_bounds="fixed")
+kernel_st =  [k1,k2,k3,k4]
 
-algorithm = WFQI(target_mdp, pi, actions, batch_size = batch_size, max_iterations = max_iterations, regressor_type = ExtraTreesRegressor, source_datasets = source_data, var_rw = 0, var_st = var_st, max_gp = 5000,
+algorithm = WFQI(target_mdp, pi, actions, batch_size = batch_size, max_iterations = max_iterations, regressor_type = ExtraTreesRegressor, source_datasets = source_data, var_rw = 0, var_st = var_st, max_gp = 10000,
                  weight_estimator = estimate_weights_mean, max_weight = 1000, kernel_rw = None, kernel_st = kernel_st, weight_rw = False, weight_st = [True, True, True, True],
                  subtract_noise_rw = False, subtract_noise_st = False, wr = None, ws = None, verbose = True, **regressor_params)
 

@@ -2,6 +2,7 @@ import gym
 import numpy as np
 from gym import spaces
 from scipy.integrate import odeint
+from trlib.environments.acrobot_gym import bound
 
 """
 The Acrobot environment
@@ -25,6 +26,9 @@ class Acrobot(gym.Env):
         'render.modes': ['human', 'rgb_array'],
         'video.frames_per_second': 15
     }
+    
+    MAX_VEL_1 = 4 * np.pi
+    MAX_VEL_2 = 9 * np.pi
 
     def __init__(self, m1 = 1.0, m2 = 1.0, l1 = 1.0, l2 = 1.0, mu1 = 0.01, mu2 = 0.01):
         self.horizon = 100
@@ -68,7 +72,9 @@ class Acrobot(gym.Env):
 
         x[0] = self._wrap2pi(x[0])
         x[1] = self._wrap2pi(x[1])
-
+        x[2] = bound(x[2], -self.MAX_VEL_1, self.MAX_VEL_1)
+        x[3] = bound(x[3], -self.MAX_VEL_2, self.MAX_VEL_2)
+        
         self._state = x
 
         reward = 0.0
