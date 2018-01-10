@@ -38,7 +38,7 @@ pre_callback_list = []
 fit_params = {}
 
 max_iterations = 100
-batch_size = 5
+batch_size = 50
 n_steps = 10
 n_runs = 20
 n_jobs = 10
@@ -68,7 +68,7 @@ result.save_json("laroche2017.json")
 pi = EpsilonGreedy(actions, ZeroQ(), 0.1)
 
 algorithm = Lazaric2008(target_mdp, pi, actions, batch_size = batch_size, max_iterations = max_iterations, regressor_type = ExtraTreesRegressor, source_datasets = source_data,
-                 delta_sa = 0.1, delta_s_prime = 0.1, delta_r = 0.1, mu = 0.8, n_sample_total = 8000, prior = None, verbose = True, **regressor_params)
+                 delta_sa = 0.1, delta_s_prime = 0.1, delta_r = 0.1, mu = 0.8, n_sample_total = 15000, prior = None, verbose = True, **regressor_params)
 
 experiment = RepeatExperiment("lazaric2008", algorithm, n_steps = n_steps, n_runs = n_runs, callback_list = callback_list, pre_callback_list = pre_callback_list, **fit_params)
 result = experiment.run(n_jobs)
