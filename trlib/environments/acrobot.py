@@ -178,3 +178,19 @@ class Acrobot(gym.Env):
         tmp -= width * np.floor(tmp / width)
 
         return tmp + -np.pi
+    
+    def get_transition_mean(self, s, a):
+        
+        current_state = self.get_state()
+        self.reset(s)
+        ns,_,_,_ = self.step(a)
+        self.reset(current_state)
+        return ns
+    
+    def get_reward_mean(self, s, a):
+        
+        current_state = self.get_state()
+        self.reset(s)
+        _,r,_,_ = self.step(a)
+        self.reset(current_state)
+        return r
