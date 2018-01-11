@@ -73,8 +73,8 @@ class AcrobotGym(gym.Env):
 
     def reset(self, state = None):
         if state is None:
-            self.state = np.random.uniform(low=-0.1, high=0.1, size=(4,))
-            #self.state = np.random.uniform(low=-pi, high=pi, size=(4,))
+            self.state = np.zeros(4)
+            self.state[0] = np.random.uniform(low = -2.0, high = 2.0)
         else:
             s = np.array(state)
             s[0] = wrap(s[0], -pi, pi)
