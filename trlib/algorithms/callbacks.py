@@ -64,6 +64,7 @@ def eval_greedy_policy_callback(field_name, criterion = 'discounted', n_episodes
         fields = {}
         fields[field_name + "_mean"] = perf[0]
         fields[field_name + "_std"] = perf[1]
+        fields[field_name + "_steps"] = perf[2]
         algorithm._result.update_step(**fields)
     
     return fun

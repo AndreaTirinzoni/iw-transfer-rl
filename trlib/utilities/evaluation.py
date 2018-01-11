@@ -35,7 +35,7 @@ def evaluate_policy(mdp, policy, criterion = 'discounted', n_episodes = 1, initi
     
     n_episodes = len(initial_states) if type(initial_states) is list else n_episodes
     scores = np.array(scores)
-    return np.mean(scores), np.std(scores) / np.sqrt(n_episodes)
+    return np.mean(scores[:,0]), np.std(scores[:,0]) / np.sqrt(n_episodes), np.mean(scores[:,1])
 
 def _single_eval(mdp, policy, criterion, initial_state):
     
@@ -54,4 +54,4 @@ def _single_eval(mdp, policy, criterion, initial_state):
         if done:
             break
     
-    return score if criterion == "discounted" else score / t
+    return score if criterion == "discounted" else score / t, t
