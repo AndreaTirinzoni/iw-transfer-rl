@@ -24,10 +24,6 @@ regressor_params = {'n_estimators': 50,
                     'min_samples_split':5,
                     'min_samples_leaf': 2}
 
-initial_states = [np.array([-2.0,0.,0.,0.]),np.array([-1.5,0.,0.,0.]),np.array([-1.0,0.,0.,0.]),
-                  np.array([-0.5,0.,0.,0.]),np.array([0.0,0.,0.,0.]),np.array([0.5,0.,0.,0.]),
-                  np.array([1.0,0.,0.,0.]),np.array([1.5,0.,0.,0.]),np.array([2.0,0.,0.,0.])]
-
 callback_list = []
 callback_list.append(get_callback_list_entry("eval_greedy_policy_callback", field_name = "perf_disc_greedy", criterion = 'discounted', n_episodes = 5))
 
@@ -36,9 +32,9 @@ pre_callback_list = []
 fit_params = {}
 
 max_iterations = 100
-batch_size = 5
-n_steps = 6
-n_runs = 20
+batch_size = 50
+n_steps = 5
+n_runs = 10
 n_jobs = 10
 
 """ --- FQI --- """
@@ -57,16 +53,16 @@ pi = EpsilonGreedy(actions, ZeroQ(), 0.1)
 
 algorithm = Laroche2017(target_mdp, pi, verbose = True, actions = actions, batch_size = batch_size, max_iterations = max_iterations, regressor_type = ExtraTreesRegressor, source_datasets=source_data, **regressor_params)
 
-experiment = RepeatExperiment("laroche2017", algorithm, n_steps = n_steps, n_runs = n_runs, callback_list = callback_list, pre_callback_list = pre_callback_list, **fit_params)
-result = experiment.run(n_jobs)
-result.save_json("laroche2017.json")
+#experiment = RepeatExperiment("laroche2017", algorithm, n_steps = n_steps, n_runs = n_runs, callback_list = callback_list, pre_callback_list = pre_callback_list, **fit_params)
+#result = experiment.run(n_jobs)
+#result.save_json("laroche2017.json")
 
 """ --- LAZARIC --- """
 
 pi = EpsilonGreedy(actions, ZeroQ(), 0.1)
 
 algorithm = Lazaric2008(target_mdp, pi, actions, batch_size = batch_size, max_iterations = max_iterations, regressor_type = ExtraTreesRegressor, source_datasets = source_data,
-                 delta_sa = 0.1, delta_s_prime = 0.1, delta_r = 0.1, mu = 0.8, n_sample_total = 6000, prior = None, verbose = True, **regressor_params)
+                 delta_sa = 0.1, delta_s_prime = 0.1, delta_r = 0.1, mu = 0.8, n_sample_total = 15000, prior = None, verbose = True, **regressor_params)
 
 experiment = RepeatExperiment("lazaric2008", algorithm, n_steps = n_steps, n_runs = n_runs, callback_list = callback_list, pre_callback_list = pre_callback_list, **fit_params)
 result = experiment.run(n_jobs)

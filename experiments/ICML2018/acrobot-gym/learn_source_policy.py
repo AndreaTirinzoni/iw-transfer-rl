@@ -14,8 +14,8 @@ source_mdp_1 = AcrobotGym(m1 = 0.8, m2 = 1.3, l1 = 0.7, l2 = 1.2) # -112 on targ
 source_mdp_2 = AcrobotGym(m1 = 1.2, m2 = 0.6, l1 = 1.1, l2 = 0.5) # -110 on target (-319 from vertical)
 target_mdp = AcrobotGym(m1 = 1.0, m2 = 1.0, l1 = 1.0, l2 = 1.0) # -70 (-110 from vertical)
 
-mdp = target_mdp
-file_name = "target_policy"
+mdp = source_mdp_1
+file_name = "source_policy_1"
 
 actions = [0, 1, 2]
 pi = EpsilonGreedy(actions, ZeroQ(), 0.1)
@@ -27,14 +27,10 @@ regressor_params = {'n_estimators': 50,
 
 fqi = FQI(mdp, pi, verbose = True, actions = actions, batch_size = 50, max_iterations = 100, regressor_type = ExtraTreesRegressor, **regressor_params)
 
-initial_states = [np.array([-2.0,0.,0.,0.]),np.array([-1.5,0.,0.,0.]),np.array([-1.0,0.,0.,0.]),
-                  np.array([-0.5,0.,0.,0.]),np.array([0.0,0.,0.,0.]),np.array([0.5,0.,0.,0.]),
-                  np.array([1.0,0.,0.,0.]),np.array([1.5,0.,0.,0.]),np.array([2.0,0.,0.,0.])]
-
 callback_list = []
-callback_list.append(get_callback_list_entry("eval_greedy_policy_callback", field_name = "perf_disc_greedy", criterion = 'discounted', initial_states = initial_states))
+callback_list.append(get_callback_list_entry("eval_greedy_policy_callback", field_name = "perf_disc_greedy", criterion = 'discounted', n_episodes = 5))
 
-experiment = RepeatExperiment("FQI Experiment", fqi, n_steps = 3, n_runs = 1, callback_list = callback_list)
+experiment = RepeatExperiment("FQI Experiment", fqi, n_steps = 5, n_runs = 1, callback_list = callback_list)
 result = experiment.run(1)
 
 plot_average([result], "n_episodes", "perf_disc_greedy_mean", names = ["FQI"])
@@ -42,6 +38,6 @@ plot_average([result], "n_episodes", "n_samples", names = ["FQI"])
 
 policy = EpsilonGreedy(actions, pi.Q, 0)
 
-print(evaluate_policy(mdp, policy, criterion = 'discounted', initial_states = initial_states))
+print(evaluate_policy(mdp, policy, criterion = 'discounted', n_episodes = 5))
 
 save_object(policy, file_name)
