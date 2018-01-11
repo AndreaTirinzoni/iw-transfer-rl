@@ -74,6 +74,7 @@ class AcrobotGym(gym.Env):
     def reset(self, state = None):
         if state is None:
             self.state = np.random.uniform(low=-0.1, high=0.1, size=(4,))
+            #self.state = np.random.uniform(low=-pi, high=pi, size=(4,))
         else:
             s = np.array(state)
             s[0] = wrap(s[0], -pi, pi)
@@ -85,6 +86,8 @@ class AcrobotGym(gym.Env):
 
     def step(self, a):
         s = self.state
+        reward = -np.cos(s[0]) - np.cos(s[1] + s[0]) - 2.0
+        
         torque = self.AVAIL_TORQUE[int(a)]
 
         # Add noise to the force action
@@ -110,7 +113,6 @@ class AcrobotGym(gym.Env):
         ns[3] = bound(ns[3], -self.MAX_VEL_2, self.MAX_VEL_2)
         self.state = ns
         terminal = self._terminal()
-        reward = -1. if not terminal else 0.
         return self.get_state(), reward, terminal, {}
 
     def get_state(self):
