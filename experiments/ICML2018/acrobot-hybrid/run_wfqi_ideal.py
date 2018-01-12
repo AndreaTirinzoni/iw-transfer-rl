@@ -9,18 +9,20 @@ from trlib.utilities.data import load_object
 from trlib.algorithms.transfer.wfqi import WFQI, estimate_weights_mean
 from sklearn.gaussian_process.kernels import RBF, WhiteKernel
 from trlib.environments.puddleworld import PuddleWorld
-from trlib.utilities.wfqi_utils import estimate_ideal_weights
+from trlib.utilities.wfqi_utils import estimate_ideal_weights, generate_source
 from trlib.policies.policy import Uniform
 from trlib.environments.acrobot_hybrid import AcrobotHybrid
+from acro_policy import AcrobotPolicy
 
 """ --- ENVIRONMENTS --- """
-target_mdp = AcrobotHybrid(m1 = 1.0, m2 = 1.0, l1 = 1.0, l2 = 1.0)
-source_mdp_1 = AcrobotHybrid(l1 = 0.8, l2 = 0.6, m1 = 0.9, m2 = 1.)
-source_mdp_2 = AcrobotHybrid(l1 = 0.95, l2 = 0.95, m1 = 0.95, m2 = 1.)
-source_mdp_3 = AcrobotHybrid(l1 = 0.85, l2 = 0.85, m1 = 0.9, m2 = 0.9)
+target_mdp = AcrobotHybrid(m1 = 1.0, m2 = 1.0, l1 = 1.0, l2 = 1.0, inv = True)
+source_mdp_1 = AcrobotHybrid(m1 = 0.8, m2 = 0.8, l1 = 0.8, l2 = 0.8)
+source_mdp_2 = AcrobotHybrid(m1 = 0.8, m2 = 1.3, l1 = 0.9, l2 = 1.2)
+source_mdp_3 = AcrobotHybrid(m1 = 0.9, m2 = 0.6, l1 = 1.1, l2 = 0.7)
 source_mdps = [source_mdp_1,source_mdp_2,source_mdp_3]
 
 actions = [0, 1]
+
 source_data = [load_object("source_data_" + str(i)) for i in [1,2,3]]
 
 """ --- PARAMS --- """
@@ -45,7 +47,7 @@ max_iterations = 50
 batch_size = 20
 n_steps = 10
 n_runs = 20
-n_jobs = 5
+n_jobs = 10
 
 """ --- WEIGHTS --- """
 

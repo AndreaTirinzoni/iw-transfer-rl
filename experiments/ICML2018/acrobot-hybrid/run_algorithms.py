@@ -10,9 +10,12 @@ from trlib.algorithms.transfer.laroche2017 import Laroche2017
 from trlib.utilities.data import load_object
 from trlib.policies.policy import Uniform
 from trlib.environments.acrobot_hybrid import AcrobotHybrid
+from trlib.utilities.wfqi_utils import generate_source
+from acro_policy import AcrobotPolicy
+from trlib.utilities.evaluation import evaluate_policy
 
 """ --- ENVIRONMENTS --- """
-target_mdp = AcrobotHybrid(m1 = 1.0, m2 = 1.0, l1 = 1.0, l2 = 1.0)
+target_mdp = AcrobotHybrid(m1 = 1.0, m2 = 1.0, l1 = 1.0, l2 = 1.0, inv = True)
 
 actions = [0, 1]
 source_data = [load_object("source_data_" + str(i))[0] for i in [1,2,3]]
@@ -39,7 +42,7 @@ max_iterations = 50
 batch_size = 20
 n_steps = 10
 n_runs = 20
-n_jobs = 5
+n_jobs = 10
 
 """ --- FQI --- """
 
@@ -66,7 +69,7 @@ result.save_json("fqi.json")
 pi = EpsilonGreedy(actions, ZeroQ(), 0.1)
 
 algorithm = Lazaric2008(target_mdp, pi, actions, batch_size = batch_size, max_iterations = max_iterations, regressor_type = ExtraTreesRegressor, source_datasets = source_data,
-                 delta_sa = 0.1, delta_s_prime = 0.1, delta_r = 0.1, mu = 0.8, n_sample_total = 25000, prior = None, verbose = True, **regressor_params)
+                 delta_sa = 0.1, delta_s_prime = 0.1, delta_r = 0.1, mu = 0.8, n_sample_total = 15000, prior = None, verbose = True, **regressor_params)
 
 experiment = RepeatExperiment("lazaric2008", algorithm, n_steps = n_steps, n_runs = n_runs, callback_list = callback_list, pre_callback_list = pre_callback_list, **fit_params)
 result = experiment.run(n_jobs)

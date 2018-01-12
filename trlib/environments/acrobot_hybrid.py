@@ -36,7 +36,7 @@ class AcrobotHybrid(gym.Env):
     domain_fig = None
     actions_num = 2
 
-    def __init__(self, m1 = 1.0, m2 = 1.0, l1 = 1.0, l2 = 1.0):
+    def __init__(self, m1 = 1.0, m2 = 1.0, l1 = 1.0, l2 = 1.0, inv = False):
         
         self.horizon = 100
         self.gamma = 0.95
@@ -53,6 +53,9 @@ class AcrobotHybrid(gym.Env):
         low = -high
         self.observation_space = spaces.Box(low, high)
         self.action_space = spaces.Discrete(2)
+        
+        if inv:
+            self.AVAIL_TORQUE = [2., -2.]
         
         self.state = None
         self._seed()
