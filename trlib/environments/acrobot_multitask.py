@@ -9,7 +9,7 @@ __credits__ = ["Alborz Geramifard", "Robert H. Klein", "Christoph Dann",
 __license__ = "BSD 3-Clause"
 __author__ = "Christoph Dann <cdann@cdann.de>"
 
-class AcrobotHybrid(gym.Env):
+class AcrobotMultitask(gym.Env):
 
     metadata = {
         'render.modes': ['human', 'rgb_array'],
@@ -80,7 +80,7 @@ class AcrobotHybrid(gym.Env):
         if self.task == "swing-up":
             reward = -np.cos(s[0]) - np.cos(s[1] + s[0]) - 2.0
         else:
-            reward = -abs(s[0] - pi)
+            reward = 5*pi - abs(s[2] - pi)
             
         torque = self.AVAIL_TORQUE[int(a)]
 
