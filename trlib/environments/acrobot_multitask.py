@@ -80,7 +80,7 @@ class AcrobotMultitask(gym.Env):
         if self.task == "swing-up":
             reward = -np.cos(s[0]) - np.cos(s[1] + s[0]) - 2.0
         else:
-            reward = 5*pi - abs(s[2] - pi)
+            reward = -abs(s[2] - pi)
             
         torque = self.AVAIL_TORQUE[int(a)]
 
