@@ -56,43 +56,43 @@ class TestDiscreteFittedQ(TestCase):
     
     def test_call(self):
         
-        Q = DiscreteFittedQ(MockRegressor, 3, 2, fun = np.sum)
+        Q = DiscreteFittedQ(MockRegressor, 3, [-1,1], fun = np.sum)
         Q._regressors[1] = MockRegressor(np.prod)
         
-        self.assertEqual(7, Q(np.array([1,2,4]),0))
+        self.assertEqual(7, Q(np.array([1,2,4]),-1))
         self.assertEqual(8, Q(np.array([1,2,4]),1))
         
         with self.assertRaises(AttributeError):
-            Q(np.array([1,2]), 0)
+            Q(np.array([1,2]), -1)
             
-        with self.assertRaises(IndexError):
+        with self.assertRaises(AttributeError):
             Q(np.array([1,2,3]), 2)
             
     def test_values(self):
         
-        Q = DiscreteFittedQ(MockRegressor, 3, 2, fun = np.sum)
-        Q._regressors[1] = MockRegressor(np.prod)
+        Q = DiscreteFittedQ(MockRegressor, 3, [-5,5], fun = np.sum)
+        Q._regressors[5] = MockRegressor(np.prod)
         
-        sa = np.array([[1,2,3,0], [2,2,3,1], [3,2,3,0]])
+        sa = np.array([[1,2,3,-5], [2,2,3,5], [3,2,3,-5]])
         
         self.assertTrue(np.array_equal(np.array([6,12,8]), Q.values(sa)))
             
         with self.assertRaises(AttributeError):
-            Q.values(np.array([[1,2,3,0],[1,2,3,2]]))
+            Q.values(np.array([[1,2,3,-5],[1,2,3,2]]))
             
     def test_max(self):
         
-        Q = DiscreteFittedQ(MockRegressor, 3, 2, fun = np.sum)
-        Q._regressors[1] = MockRegressor(np.prod)
+        Q = DiscreteFittedQ(MockRegressor, 3, [10,11], fun = np.sum)
+        Q._regressors[11] = MockRegressor(np.prod)
         
         states = np.array([[1,1,1],[-2,2,2],[3,3,3],[-4,4,4]])
         absorbing = np.array([1,0,0,1])
         
         vals, acts = Q.max(states)
         self.assertTrue(np.array_equal(np.array([3.0,2.0,27.0,4.0]), vals))
-        self.assertTrue(np.array_equal(np.array([0,0,1,0]), acts))
+        self.assertTrue(np.array_equal(np.array([10,10,11,10]), acts))
         
         vals, acts = Q.max(states, absorbing=absorbing)
         self.assertTrue(np.array_equal(np.array([0.0,2.0,27.0,0.0]), vals))
-        self.assertTrue(np.array_equal(np.array([0,0,1,0]), acts))
+        self.assertTrue(np.array_equal(np.array([10,10,11,10]), acts))
         

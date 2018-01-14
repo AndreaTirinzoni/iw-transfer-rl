@@ -26,7 +26,7 @@ class FQI(Algorithm):
         self._regressor_type = regressor_type
         
         if isinstance(mdp.action_space, spaces.Discrete):
-            self._policy.Q = DiscreteFittedQ(regressor_type, mdp.state_dim, len(actions), **regressor_params)
+            self._policy.Q = DiscreteFittedQ(regressor_type, mdp.state_dim, actions, **regressor_params)
         else:
             self._policy.Q = FittedQ(regressor_type, mdp.state_dim, mdp.action_dim, **regressor_params)
         

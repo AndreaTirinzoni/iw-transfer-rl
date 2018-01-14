@@ -130,16 +130,22 @@ class DiscreteFittedQ(QFunction):
     one for each discrete action. This is only for discrete action-spaces.
     """
     
-    def __init__(self, regressor_type, state_dim, n_actions, **regressor_params):
+    def __init__(self, regressor_type, state_dim, actions, **regressor_params):
             
-        self._regressors = [regressor_type(**regressor_params) for _ in range(n_actions)]
+        self._n_actions = len(actions)
         self._state_dim = state_dim
-        self._n_actions = n_actions
+        self._actions = actions
+        
+        self._regressors = {}
+        for a in actions:
+            self._regressors[a] = regressor_type(**regressor_params)
         
     def __call__(self, state, action):
         
         if not np.shape(state)[0] == self._state_dim:
             raise AttributeError("State is not of the right shape")
+        if not action in self._actions:
+            raise AttributeError("Action does not exist")
         return self._action_values(state[np.newaxis,:], action)
     
     
@@ -155,7 +161,7 @@ class DiscreteFittedQ(QFunction):
         vals = np.zeros(np.shape(sa)[0])
         check_mask = np.zeros(np.shape(sa)[0])
         
-        for a in range(self._n_actions):
+        for a in self._actions:
             mask = sa[:,-1] == a
             check_mask = np.logical_or(mask,check_mask)
             vals[mask] = self._action_values(sa[mask, 0:-1], a)
@@ -174,7 +180,7 @@ class DiscreteFittedQ(QFunction):
         vals = np.empty((n_states,self._n_actions))
         
         for a in range(self._n_actions):
-            vals[:,a] = self._action_values(states, a)
+            vals[:,a] = self._action_values(states, self._actions[a])
         
         if absorbing is not None:
             vals[absorbing == 1, :] = 0
@@ -182,6 +188,7 @@ class DiscreteFittedQ(QFunction):
         max_actions = np.argmax(vals,1)
         idx = np.ogrid[:n_states]
         max_vals = vals[idx,max_actions]
+        max_actions = [self._actions[a] for a in list(max_actions)]
         
         return max_vals, max_actions
     
@@ -189,7 +196,7 @@ class DiscreteFittedQ(QFunction):
         
         params = dict(fit_params)
         
-        for a in range(self._n_actions):
+        for a in self._actions:
             mask = sa[:,-1] == a
             if "sample_weight" in fit_params:
                 w = fit_params["sample_weight"]
