@@ -113,6 +113,8 @@ class Dam(gym.Env):
         
     def step(self, action):
         
+        action = float(action)
+        
         # Get current state
         state = self.get_state()
         storage = state[0]
