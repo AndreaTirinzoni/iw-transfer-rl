@@ -74,7 +74,7 @@ class WFQI(FQI):
     
     def __init__(self, mdp, policy, actions, batch_size, max_iterations, regressor_type, source_datasets, var_rw, var_st, max_gp,
                  weight_estimator = estimate_weights_mean, max_weight = 1000, kernel_rw = None, kernel_st = None, weight_rw = True, weight_st = [True],
-                 subtract_noise_rw = False, subtract_noise_st = False, wr = None, ws = None, verbose = False, **regressor_params):
+                 subtract_noise_rw = False, subtract_noise_st = False, wr = None, ws = None, init_policy = None, verbose = False, **regressor_params):
         
         self._var_rw = var_rw
         self._var_st = var_st
@@ -97,7 +97,7 @@ class WFQI(FQI):
         self._wr = wr
         self._ws = ws
         
-        super().__init__(mdp, policy, actions, batch_size, max_iterations, regressor_type, verbose, **regressor_params)
+        super().__init__(mdp, policy, actions, batch_size, max_iterations, regressor_type, init_policy, verbose, **regressor_params)
         
         self._source_predictions_rw = []
         self._source_predictions_st = []
@@ -198,7 +198,7 @@ class WFQI(FQI):
     
     def _step_core(self, **kwargs):
         
-        policy = self._policy if self._step > 1 else Uniform(self._actions)
+        policy = self._policy if self._step > 1 else self._init_policy
         self._data.append(generate_episodes(self._mdp, policy, self._batch_size))
         self.n_episodes += self._batch_size
         target_data = np.concatenate(self._data)

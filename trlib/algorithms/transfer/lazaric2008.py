@@ -96,7 +96,7 @@ class Lazaric2008(FQI):
     """
     
     def __init__(self, mdp, policy, actions, batch_size, max_iterations, regressor_type, source_datasets,
-                 delta_sa, delta_s_prime, delta_r, mu, n_sample_total, prior = None, verbose = False, **regressor_params):
+                 delta_sa, delta_s_prime, delta_r, mu, n_sample_total, prior = None, init_policy = None, verbose = False, **regressor_params):
         
 
         self._n_source_mdps = len(source_datasets)
@@ -108,11 +108,11 @@ class Lazaric2008(FQI):
         self._mu = mu
         self._n_sample_total = n_sample_total
         
-        super().__init__(mdp, policy, actions, batch_size, max_iterations, regressor_type, verbose, **regressor_params)
+        super().__init__(mdp, policy, actions, batch_size, max_iterations, regressor_type, init_policy, verbose, **regressor_params)
     
     def _step_core(self, **kwargs):
         
-        policy = self._policy if self._step > 1 else Uniform(self._actions)
+        policy = self._policy if self._step > 1 else self._init_policy
         self._data.append(generate_episodes(self._mdp, policy, self._batch_size))
         self.n_episodes += self._batch_size
         target_data = np.concatenate(self._data)

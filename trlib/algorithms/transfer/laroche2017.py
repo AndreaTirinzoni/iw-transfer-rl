@@ -13,17 +13,17 @@ class Laroche2017(FQI):
       - Laroche, Romain, and Merwan Barlier. "Transfer Reinforcement Learning with Shared Dynamics." AAAI. 2017.
     """
     
-    def __init__(self, mdp, policy, actions, batch_size, max_iterations, regressor_type, source_datasets, verbose = False, **regressor_params):
+    def __init__(self, mdp, policy, actions, batch_size, max_iterations, regressor_type, source_datasets, init_policy = None, verbose = False, **regressor_params):
         
         self._n_source_mdps = len(source_datasets)
         source_data = np.concatenate(source_datasets)
         _,_,_,_,self._source_s_prime,self._source_absorbing,self._source_sa = split_data(source_data, mdp.state_dim, mdp.action_dim)
         
-        super().__init__(mdp, policy, actions, batch_size, max_iterations, regressor_type, verbose, **regressor_params)
+        super().__init__(mdp, policy, actions, batch_size, max_iterations, regressor_type, init_policy, verbose, **regressor_params)
         
     def _step_core(self, **kwargs):
         
-        policy = self._policy if self._step > 1 else Uniform(self._actions)
+        policy = self._policy if self._step > 1 else self._init_policy
         self._data.append(generate_episodes(self._mdp, policy, self._batch_size))
         self.n_episodes += self._batch_size
         data = np.concatenate(self._data)

@@ -16,7 +16,7 @@ class FQI(Algorithm):
         Journal of Machine Learning Research 6.Apr (2005): 503-556
     """
     
-    def __init__(self, mdp, policy, actions, batch_size, max_iterations, regressor_type, verbose = False, **regressor_params):
+    def __init__(self, mdp, policy, actions, batch_size, max_iterations, regressor_type, init_policy = None, verbose = False, **regressor_params):
         
         super().__init__("FQI", mdp, policy, verbose)
         
@@ -24,6 +24,11 @@ class FQI(Algorithm):
         self._batch_size = batch_size
         self._max_iterations = max_iterations
         self._regressor_type = regressor_type
+        
+        if init_policy is None:
+            self._init_policy = Uniform(actions)
+        else:
+            self._init_policy = init_policy
         
         if isinstance(mdp.action_space, spaces.Discrete):
             self._policy.Q = DiscreteFittedQ(regressor_type, mdp.state_dim, actions, **regressor_params)
@@ -48,7 +53,7 @@ class FQI(Algorithm):
         
     def _step_core(self, **kwargs):
         
-        policy = self._policy if self._step > 1 else Uniform(self._actions)
+        policy = self._policy if self._step > 1 else self._init_policy
         self._data.append(generate_episodes(self._mdp, policy, self._batch_size))
         self.n_episodes += self._batch_size
         data = np.concatenate(self._data)
