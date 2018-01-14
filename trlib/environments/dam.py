@@ -89,8 +89,8 @@ class Dam(gym.Env):
         y = np.zeros(360)  
         x = np.arange(360)
         y[0:120] = np.sin(x[0:120] * 3 * np.pi / 359) / 2 + 0.25
-        y[120:240] = np.sin(x[120:240] * 3 * np.pi / 359) * 3 + 0.25
-        y[240:] = np.sin(x[240:] * 3 * np.pi / 359) / 4 + 0.25
+        y[120:240] = np.sin(x[120:240] * 3 * np.pi / 359 + np.pi) * 3 + 0.25
+        y[240:] = np.sin(x[240:] * 3 * np.pi / 359 + np.pi) / 4 + 0.25
         return y * 8 + 4
     
     def _get_inflow_3(self):
