@@ -29,18 +29,20 @@ class Dam(gym.Env):
         'video.frames_per_second': 30
     }
 
-    def __init__(self, capacity = 500.0, demand = 10.0, flooding = 200.0, inflow_profile = 1, inflow_std = 4.0, alpha = 0.5, beta = 0.5, penalty_on = False):
+    def __init__(self, inflow_profile = 1, alpha = 0.5, beta = 0.5, penalty_on = False):
         
         self.horizon = 360
         self.gamma = 0.999
         self.state_dim = 2
         self.action_dim = 1
 
-        self.DEMAND = demand  # Water demand -> At least DEMAND/day must be supplied or a cost is incurred
-        self.FLOODING = flooding  # Flooding threshold -> No more than FLOODING can be stored or a cost is incurred
-        self.CAPACITY = capacity  # Maximum storage capacity -> At least max{S - CAPACITY, 0} must be released
+        self.DEMAND = 10.0  # Water demand -> At least DEMAND/day must be supplied or a cost is incurred
+        self.FLOODING = 300.0  # Flooding threshold -> No more than FLOODING can be stored or a cost is incurred
+        self.MIN_STORAGE = 50.0 # Minimum storage capacity -> At most max{S - MIN_STORAGE, 0} must be released
+        self.MAX_STORAGE = 500.0  # Maximum storage capacity -> At least max{S - MAX_STORAGE, 0} must be released
+        
         self.INFLOW_MEAN = self._get_inflow_profile(inflow_profile)  # Random inflow (e.g. rain) mean for each day (360-dimensional vector)
-        self.INFLOW_STD = inflow_std # Random inflow std
+        self.INFLOW_STD = 2.0 # Random inflow std
         
         assert alpha + beta == 1.0 # Check correctness
         self.ALPHA = alpha # Weight for the flooding cost
@@ -51,7 +53,7 @@ class Dam(gym.Env):
         # Gym attributes
         self.viewer = None
         
-        self.action_space = spaces.Box(low=np.array([0]), high=np.array([30]))  
+        self.action_space = spaces.Discrete(8)  
         
         self.observation_space = spaces.Box(low=np.array([0,1]),
                                             high=np.array([np.inf,360]))
@@ -62,7 +64,7 @@ class Dam(gym.Env):
     
     def _get_inflow_profile(self,n):
         
-        assert n >= 1 and n <=4
+        assert n >= 1 and n <= 4
         
         if n == 1:
             return self._get_inflow_1()
@@ -76,50 +78,38 @@ class Dam(gym.Env):
     def _get_inflow_1(self):
         
         y = np.zeros(360)  
-        for x in range(360):
-            if x < 120:
-                y[x] = np.sin(x * 3 * np.pi / 359) + 0.5
-            elif x < 240:
-                y[x] = np.sin(x * 3 * np.pi / 359) / 2 + 0.5
-            else:
-                y[x] = np.sin(x * 3 * np.pi / 359) + 0.5
-        return y * 8 + 2
+        x = np.arange(360)
+        y[0:120] = np.sin(x[0:120] * 3 * np.pi / 359) + 0.5
+        y[120:240] = np.sin(x[120:240] * 3 * np.pi / 359) / 2 + 0.5
+        y[240:] = np.sin(x[240:] * 3 * np.pi / 359) + 0.5
+        return y * 8 + 4
     
     def _get_inflow_2(self):
         
         y = np.zeros(360)  
-        for x in range(360):
-            if x < 120:
-                y[x] = np.sin(x * 3 * np.pi / 359) / 2 + 0.25
-            elif x < 240:
-                y[x] = np.sin(x * 3 * np.pi / 359 + np.pi) * 3 + 0.25
-            else:
-                y[x] = np.sin(x * 3 * np.pi / 359 + np.pi) / 4 + 0.25
-        return y * 8 + 2
+        x = np.arange(360)
+        y[0:120] = np.sin(x[0:120] * 3 * np.pi / 359) / 2 + 0.25
+        y[120:240] = np.sin(x[120:240] * 3 * np.pi / 359) * 3 + 0.25
+        y[240:] = np.sin(x[240:] * 3 * np.pi / 359) / 4 + 0.25
+        return y * 8 + 4
     
     def _get_inflow_3(self):
         
         y = np.zeros(360)  
-        for x in range(360):
-            if x < 120:
-                y[x] = np.sin(x * 3 * np.pi / 359) * 3 + 0.25
-            elif x < 240:
-                y[x] = np.sin(x * 3 * np.pi / 359) / 4 + 0.25
-            else:
-                y[x] = np.sin(x * 3 * np.pi / 359) / 2 + 0.25
-        return y * 8 + 2
+        x = np.arange(360)
+        y[0:120] = np.sin(x[0:120] * 3 * np.pi / 359) * 3 + 0.25
+        y[120:240] = np.sin(x[120:240] * 3 * np.pi / 359) / 4 + 0.25
+        y[240:] = np.sin(x[240:] * 3 * np.pi / 359) / 2 + 0.25
+        return y * 8 + 4
     
     def _get_inflow_4(self):
         
         y = np.zeros(360)  
-        for x in range(360):
-            if x < 120:
-                y[x] = np.sin(x * 3 * np.pi / 359) + 0.5
-            elif x < 240:
-                y[x] = np.sin(x * 3 * np.pi / 359) / 2.5 + 0.5
-            else:
-                y[x] = np.sin(x * 3 * np.pi / 359) + 0.5
-        return y * 7 + 2
+        x = np.arange(360)
+        y[0:120] = np.sin(x[0:120] * 3 * np.pi / 359) + 0.5
+        y[120:240] = np.sin(x[120:240] * 3 * np.pi / 359) / 2.5 + 0.5
+        y[240:] = np.sin(x[240:] * 3 * np.pi / 359) + 0.5
+        return y * 7 + 4
         
     def step(self, action):
         
@@ -129,8 +119,8 @@ class Dam(gym.Env):
         day = state[1]
         
         # Bound the action
-        actionLB = max(storage - self.CAPACITY, 0.0)
-        actionUB = storage
+        actionLB = max(storage - self.MAX_STORAGE, 0.0)
+        actionUB = max(storage - self.MIN_STORAGE, 0.0)
 
         # Penalty proportional to the violation
         bounded_action = min(max(action, actionLB), actionUB)
@@ -142,13 +132,13 @@ class Dam(gym.Env):
         nextstorage = max(storage + inflow - action, 0.0)
 
         # Cost due to the excess level wrt the flooding threshold
-        reward_flooding = -max(storage - self.FLOODING, 0.0) / 6 + penalty
+        reward_flooding = -max(storage - self.FLOODING, 0.0) / 4
 
         # Deficit in the water supply wrt the water demand
-        reward_demand = -max(self.DEMAND - action, 0.0) ** 2 + penalty
+        reward_demand = -max(self.DEMAND - action, 0.0) ** 2
         
         # The final reward is a weighted average of the two costs
-        reward = self.ALPHA * reward_flooding + self.BETA * reward_demand
+        reward = self.ALPHA * reward_flooding + self.BETA * reward_demand + penalty
 
         # Get next day
         nextday = day + 1 if day < 360 else 1
@@ -161,35 +151,27 @@ class Dam(gym.Env):
         
         if state is None:
             init_days = np.array([1, 120, 240])
-            self.state = [np.random.uniform(0.0, self.CAPACITY), init_days[np.random.randint(low=0,high=3)]]
+            self.state = [np.random.uniform(self.MIN_STORAGE, self.MAX_STORAGE), init_days[np.random.randint(low=0,high=3)]]
         else:
-            self.state = state
+            self.state = np.array(state)
 
         return self.get_state()
 
     def get_state(self):
         return np.array(self.state)
     
-    def get_reward(self,storage,action):
+    def get_transition_mean(self, s, a):
         
-        # Bound the action
-        actionLB = max(storage - self.CAPACITY, 0.0)
-        actionUB = storage
-
-        # Penalty proportional to the violation
-        bounded_action = min(max(action, actionLB), actionUB)
-        penalty = -abs(bounded_action - action) * self.penalty_on
-
-        # Transition dynamics
-        action = bounded_action
-
-        # Cost due to the excess level wrt the flooding threshold
-        reward_flooding = -max(storage - self.FLOODING, 0.0) / 6 + penalty
-
-        # Deficit in the water supply wrt the water demand
-        reward_demand = -max(self.DEMAND - action, 0.0) ** 2 + penalty
+        current_state = self.get_state()
+        self.reset(s)
+        ns,_,_,_ = self.step(a)
+        self.reset(current_state)
+        return ns
+    
+    def get_reward_mean(self, s, a):
         
-        # The final reward is a weighted average of the two costs
-        reward = self.ALPHA * reward_flooding + self.BETA * reward_demand
-        
-        return reward
+        current_state = self.get_state()
+        self.reset(s)
+        _,r,_,_ = self.step(a)
+        self.reset(current_state)
+        return r
