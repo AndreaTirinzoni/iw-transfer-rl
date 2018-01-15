@@ -6,14 +6,15 @@ from trlib.algorithms.callbacks import get_callback_list_entry
 import numpy as np
 from trlib.experiments.experiment import RepeatExperiment
 from trlib.utilities.data import load_object
-from trlib.algorithms.transfer.wfqi import WFQI, estimate_weights_mean
-from sklearn.gaussian_process.kernels import RBF, WhiteKernel, ConstantKernel
+from trlib.algorithms.transfer.wfqi import WFQI
+from trlib.utilities.wfqi_utils import estimate_ideal_weights
 
 """ --- ENVIRONMENTS --- """
 source_mdp_1 = Dam(inflow_profile = 2, alpha = 0.8, beta = 0.2)
 source_mdp_2 = Dam(inflow_profile = 3, alpha = 0.35, beta = 0.65)
 source_mdp_3 = Dam(inflow_profile = 4, alpha = 0.7, beta = 0.3)
 target_mdp = Dam(inflow_profile = 1, alpha = 0.3, beta = 0.7)
+source_mdps = [source_mdp_1,source_mdp_2,source_mdp_3]
 
 actions = [0, 3, 5, 7, 10, 15, 20, 30]
 source_data = [load_object("source_data_" + str(i)) for i in [1,2,3]]
@@ -39,25 +40,22 @@ max_iterations = 120
 batch_size = 1
 n_steps = 10
 n_runs = 20
-n_jobs = 5
+n_jobs = 10
 
 """ --- WEIGHTS --- """
 
-var_rw = 1.0
-var_st = 5.0
+var_rw = 0.5 ** 2
+var_st = 2.0 ** 2
+wr,ws = estimate_ideal_weights(target_mdp, source_mdps, [data[0] for data in source_data], var_rw, var_st)
 
 """ --- WFQI --- """
 
 pi = EpsilonGreedy(actions, ZeroQ(), 0.3)
 
-kernel_rw = ConstantKernel(11.9**2, constant_value_bounds = "fixed") * RBF(length_scale=[1.58, 1e+05, 0.000567], length_scale_bounds = "fixed")
-kernel_st = ConstantKernel(213**2, constant_value_bounds = "fixed") * RBF(length_scale = 215, length_scale_bounds = "fixed") + WhiteKernel(noise_level = 4.0, noise_level_bounds = "fixed")
-kernel_st = [kernel_st]
+algorithm = WFQI(target_mdp, pi, actions, batch_size = batch_size, max_iterations = max_iterations, regressor_type = ExtraTreesRegressor, source_datasets = source_data, var_rw = var_rw, var_st = var_st, max_gp = 0,
+                 weight_estimator = None, max_weight = 1000, kernel_rw = None, kernel_st = None, weight_rw = None, weight_st = None,
+                 subtract_noise_rw = False, subtract_noise_st = False, wr = wr, ws = ws, verbose = True, **regressor_params)
 
-algorithm = WFQI(target_mdp, pi, actions, batch_size = batch_size, max_iterations = max_iterations, regressor_type = ExtraTreesRegressor, source_datasets = source_data, var_rw = var_rw, var_st = var_st, max_gp = 10000,
-                 weight_estimator = estimate_weights_mean, max_weight = 1000, kernel_rw = kernel_rw, kernel_st = kernel_st, weight_rw = True, weight_st = [True, False],
-                 subtract_noise_rw = False, subtract_noise_st = True, wr = None, ws = None, verbose = True, **regressor_params)
-
-experiment = RepeatExperiment("WFQI-mean", algorithm, n_steps = n_steps, n_runs = n_runs, callback_list = callback_list)
+experiment = RepeatExperiment("WFQI-ideal", algorithm, n_steps = n_steps, n_runs = n_runs, callback_list = callback_list)
 result = experiment.run(n_jobs)
-result.save_json("wfqi-mean.json")
+result.save_json("wfqi-ideal.json")
