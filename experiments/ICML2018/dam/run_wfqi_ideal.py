@@ -21,10 +21,9 @@ source_data = [load_object("source_data_" + str(i)) for i in [1,2,3]]
 
 """ --- PARAMS --- """
 
-regressor_params = {'n_estimators': 50,
+regressor_params = {'n_estimators': 100,
                     'criterion': 'mse',
-                    'min_samples_split':20,
-                    'min_samples_leaf': 2}
+                    'min_samples_split':20}
 
 initial_states = [np.array([200.0,1]) for _ in range(10)]
 
@@ -36,7 +35,7 @@ pre_callback_list = []
 
 fit_params = {}
 
-max_iterations = 120
+max_iterations = 60
 batch_size = 1
 n_steps = 10
 n_runs = 20

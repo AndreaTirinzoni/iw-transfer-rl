@@ -72,8 +72,14 @@ class Dam(gym.Env):
             return self._get_inflow_2()
         elif n == 3:
             return self._get_inflow_3()
-        else:
+        elif n == 4:
             return self._get_inflow_4()
+        elif n == 5:
+            return self._get_inflow_5()
+        elif n == 6:
+            return self._get_inflow_6()
+        elif n == 7:
+            return self._get_inflow_7()
     
     def _get_inflow_1(self):
         
@@ -110,6 +116,33 @@ class Dam(gym.Env):
         y[120:240] = np.sin(x[120:240] * 3 * np.pi / 359) / 2.5 + 0.5
         y[240:] = np.sin(x[240:] * 3 * np.pi / 359) + 0.5
         return y * 7 + 4
+    
+    def _get_inflow_5(self):
+        
+        y = np.zeros(360)  
+        x = np.arange(360)
+        y[0:120] = np.sin(x[0:120] * 3 * np.pi / 359 - np.pi / 12) / 2 + 0.5
+        y[120:240] = np.sin(x[120:240] * 3 * np.pi / 359 - np.pi / 12) / 2 + 0.5
+        y[240:] = np.sin(x[240:] * 3 * np.pi / 359 - np.pi / 12) / 2 + 0.5
+        return y * 8 + 5
+    
+    def _get_inflow_6(self):
+        
+        y = np.zeros(360)  
+        x = np.arange(360)
+        y[0:120] = np.sin(x[0:120] * 3 * np.pi / 359 + np.pi / 8) / 3 + 0.5
+        y[120:240] = np.sin(x[120:240] * 3 * np.pi / 359 + np.pi / 8) / 3 + 0.5
+        y[240:] = np.sin(x[240:] * 3 * np.pi / 359 + np.pi / 8) / 3 + 0.5
+        return y * 8 + 4
+    
+    def _get_inflow_7(self):
+        
+        y = np.zeros(360)  
+        x = np.arange(360)
+        y[0:120] = np.sin(x[0:120] * 3 * np.pi / 359) + 0.5
+        y[120:240] = np.sin(x[120:240] * 3 * np.pi / 359) / 3 + 0.5
+        y[240:] = np.sin(x[240:] * 3 * np.pi / 359) * 2 + 0.5
+        return y * 8 + 5
         
     def step(self, action):
         

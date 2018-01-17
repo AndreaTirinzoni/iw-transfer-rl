@@ -18,10 +18,9 @@ source_data = [load_object("source_data_" + str(i))[0] for i in [1,2,3]]
 
 """ --- PARAMS --- """
 
-regressor_params = {'n_estimators': 50,
+regressor_params = {'n_estimators': 100,
                     'criterion': 'mse',
-                    'min_samples_split':20,
-                    'min_samples_leaf': 2}
+                    'min_samples_split':20}
 
 initial_states = [np.array([200.0,1]) for _ in range(10)]
 
@@ -33,7 +32,7 @@ pre_callback_list = []
 
 fit_params = {}
 
-max_iterations = 120
+max_iterations = 60
 batch_size = 1
 n_steps = 10
 n_runs = 20
@@ -54,7 +53,7 @@ result.save_json("fqi.json")
 pi = EpsilonGreedy(actions, ZeroQ(), 0.3)
 
 algorithm = Lazaric2008(target_mdp, pi, actions, batch_size = batch_size, max_iterations = max_iterations, regressor_type = ExtraTreesRegressor, source_datasets = source_data,
-                 delta_sa = 0.1, delta_s_prime = 0.1, delta_r = 0.1, mu = 0.8, n_sample_total = 20000, prior = None, verbose = True, **regressor_params)
+                 delta_sa = 0.1, delta_s_prime = 0.1, delta_r = 0.1, mu = 0.8, n_sample_total = 30000, prior = None, verbose = True, **regressor_params)
 
 experiment = RepeatExperiment("lazaric2008", algorithm, n_steps = n_steps, n_runs = n_runs, callback_list = callback_list, pre_callback_list = pre_callback_list, **fit_params)
 result = experiment.run(n_jobs)
