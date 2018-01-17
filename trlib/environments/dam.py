@@ -64,7 +64,7 @@ class Dam(gym.Env):
     
     def _get_inflow_profile(self,n):
         
-        assert n >= 1 and n <= 4
+        assert n >= 1 and n <= 7
         
         if n == 1:
             return self._get_inflow_1()
