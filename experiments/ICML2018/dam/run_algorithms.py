@@ -14,7 +14,7 @@ from trlib.environments.dam import Dam
 target_mdp = Dam(inflow_profile = 1, alpha = 0.3, beta = 0.7)
 
 actions = [0, 3, 5, 7, 10, 15, 20, 30]
-source_data = [load_object("source_data_" + str(i))[0] for i in [1,2,3]]
+source_data = [load_object("source_data_" + str(i))[0] for i in [1,2,3,4,5,6]]
 
 """ --- PARAMS --- """
 
@@ -53,7 +53,7 @@ result.save_json("fqi.json")
 pi = EpsilonGreedy(actions, ZeroQ(), 0.3)
 
 algorithm = Lazaric2008(target_mdp, pi, actions, batch_size = batch_size, max_iterations = max_iterations, regressor_type = ExtraTreesRegressor, source_datasets = source_data,
-                 delta_sa = 0.1, delta_s_prime = 0.1, delta_r = 0.1, mu = 0.8, n_sample_total = 30000, prior = None, verbose = True, **regressor_params)
+                 delta_sa = 0.1, delta_s_prime = 0.1, delta_r = 0.1, mu = 0.8, n_sample_total = 60000, prior = None, verbose = True, **regressor_params)
 
 experiment = RepeatExperiment("lazaric2008", algorithm, n_steps = n_steps, n_runs = n_runs, callback_list = callback_list, pre_callback_list = pre_callback_list, **fit_params)
 result = experiment.run(n_jobs)

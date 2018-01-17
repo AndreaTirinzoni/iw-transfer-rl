@@ -13,11 +13,14 @@ from trlib.utilities.wfqi_utils import estimate_ideal_weights
 source_mdp_1 = Dam(inflow_profile = 2, alpha = 0.8, beta = 0.2)
 source_mdp_2 = Dam(inflow_profile = 3, alpha = 0.35, beta = 0.65)
 source_mdp_3 = Dam(inflow_profile = 4, alpha = 0.7, beta = 0.3)
+source_mdp_4 = Dam(inflow_profile = 5, alpha = 0.4, beta = 0.6)
+source_mdp_5 = Dam(inflow_profile = 6, alpha = 0.6, beta = 0.4)
+source_mdp_6 = Dam(inflow_profile = 7, alpha = 0.45, beta = 0.55)
 target_mdp = Dam(inflow_profile = 1, alpha = 0.3, beta = 0.7)
-source_mdps = [source_mdp_1,source_mdp_2,source_mdp_3]
+source_mdps = [source_mdp_1,source_mdp_2,source_mdp_3,source_mdp_4,source_mdp_5,source_mdp_6]
 
 actions = [0, 3, 5, 7, 10, 15, 20, 30]
-source_data = [load_object("source_data_" + str(i)) for i in [1,2,3]]
+source_data = [load_object("source_data_" + str(i)) for i in [1,2,3,4,5,6]]
 
 """ --- PARAMS --- """
 
