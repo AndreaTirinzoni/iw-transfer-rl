@@ -1,3 +1,6 @@
+import sys
+sys.path.append("/home/andrea/transfer-rl")
+
 from trlib.environments.dam import Dam
 from experiments.ICML2018.dam.encoded_policies import DamPolicyT, DamPolicyS1,\
     DamPolicyS2, DamPolicyS3
@@ -25,4 +28,4 @@ kernel_st = [kernel_st]
 
 generate_source(mdp, n_episodes = 10800, test_fraction = 0, file_name = file_name, policy = policy,
                 policy_file_name = None, kernel_rw = kernel_rw, kernel_st = kernel_st, 
-                load_data = False, fit_rw = False, fit_st = False, subtract_noise_rw=False, subtract_noise_st=True)
+                load_data = True, fit_rw = True, fit_st = True, subtract_noise_rw=False, subtract_noise_st=True)

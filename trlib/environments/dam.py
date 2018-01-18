@@ -53,7 +53,7 @@ class Dam(gym.Env):
         # Gym attributes
         self.viewer = None
         
-        self.action_space = spaces.Discrete(8)  
+        self.action_space = None
         
         self.observation_space = spaces.Box(low=np.array([0,1]),
                                             high=np.array([np.inf,360]))
