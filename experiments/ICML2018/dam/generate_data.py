@@ -22,10 +22,10 @@ mdp = source_mdp_6
 file_name = "source_data_6"
 policy = Uniform(actions)
 
-kernel_rw = ConstantKernel(11.9**2, constant_value_bounds = "fixed") * RBF(length_scale=[1.58, 1e+05, 0.000567], length_scale_bounds = "fixed")
+kernel_rw = ConstantKernel(3.25**2, constant_value_bounds = "fixed") * RBF(length_scale=[3.2, 1e+05, 0.0161], length_scale_bounds = "fixed") + ConstantKernel(29**2, constant_value_bounds = "fixed") * RBF(length_scale=[323, 1e+05, 4.75e-05], length_scale_bounds = "fixed")
 kernel_st = ConstantKernel(213**2, constant_value_bounds = "fixed") * RBF(length_scale = 215, length_scale_bounds = "fixed") + WhiteKernel(noise_level = 4.0, noise_level_bounds = "fixed")
 kernel_st = [kernel_st]
 
-generate_source(mdp, n_episodes = 10800, test_fraction = 0, file_name = file_name, policy = policy,
+generate_source(mdp, n_episodes = 30, test_fraction = 0, file_name = file_name, policy = policy,
                 policy_file_name = None, kernel_rw = kernel_rw, kernel_st = kernel_st, 
                 load_data = True, fit_rw = True, fit_st = True, subtract_noise_rw=False, subtract_noise_st=True)
