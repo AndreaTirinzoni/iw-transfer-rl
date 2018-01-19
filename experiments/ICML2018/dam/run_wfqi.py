@@ -19,7 +19,7 @@ source_data = [load_object("source_data_" + str(i)) for i in [1,2,3,4,5,6]]
 
 regressor_params = {'n_estimators': 100,
                     'criterion': 'mse',
-                    'min_samples_split':20}
+                    'min_samples_split':10}
 
 initial_states = [np.array([200.0,1]) for _ in range(10)]
 
@@ -39,14 +39,14 @@ n_jobs = 8
 
 """ --- WEIGHTS --- """
 
-var_rw = 1.0 ** 2
-var_st = 2.5 ** 2
+var_rw = 0.5 ** 2
+var_st = 2.0 ** 2
 
 """ --- WFQI --- """
 
 pi = EpsilonGreedy(actions, ZeroQ(), 0.3)
 
-kernel_rw = ConstantKernel(11.9**2, constant_value_bounds = "fixed") * RBF(length_scale=[1.58, 1e+05, 0.000567], length_scale_bounds = "fixed")
+kernel_rw = ConstantKernel(3.25**2, constant_value_bounds = "fixed") * RBF(length_scale=[3.2, 1e+05, 0.0161], length_scale_bounds = "fixed") + ConstantKernel(29**2, constant_value_bounds = "fixed") * RBF(length_scale=[323, 1e+05, 4.75e-05], length_scale_bounds = "fixed")
 kernel_st = ConstantKernel(213**2, constant_value_bounds = "fixed") * RBF(length_scale = 215, length_scale_bounds = "fixed") + WhiteKernel(noise_level = 4.0, noise_level_bounds = "fixed")
 kernel_st = [kernel_st]
 

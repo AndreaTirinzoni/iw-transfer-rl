@@ -20,7 +20,7 @@ source_data = [load_object("source_data_" + str(i))[0] for i in [1,2,3,4,5,6]]
 
 regressor_params = {'n_estimators': 100,
                     'criterion': 'mse',
-                    'min_samples_split':20}
+                    'min_samples_split':10}
 
 initial_states = [np.array([200.0,1]) for _ in range(10)]
 
