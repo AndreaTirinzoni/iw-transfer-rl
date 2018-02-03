@@ -9,30 +9,37 @@ def plot_curves(x_data, y_mean_data, y_std_data = None, title = "", x_label = "E
     
     assert len(x_data) < 8
     
+    plt.style.use('ggplot')
+
+    plt.rcParams['font.family'] = 'serif'
+    plt.rcParams['font.serif'] = 'Ubuntu'
+    plt.rcParams['font.monospace'] = 'Ubuntu Mono'
+    plt.rcParams['font.size'] = 20
+    plt.rcParams['axes.labelsize'] = 20
+    #plt.rcParams['axes.labelweight'] = 'bold'
+    plt.rcParams['axes.titlesize'] = 20
+    plt.rcParams['xtick.labelsize'] = 16
+    plt.rcParams['ytick.labelsize'] = 16
+    plt.rcParams['legend.fontsize'] = 22
+    plt.rcParams['figure.titlesize'] = 20
+    
     fig, ax = plt.subplots()
     
     plt.title(title)
-    plt.xlabel(x_label, fontsize = 18)
-    plt.ylabel(y_label, fontsize = 18)
-    
-    ax.grid()
+    plt.xlabel(x_label)
+    plt.ylabel(y_label)
     
     X = np.array(x_data)
     plt.xlim([X.min(),X.max()])
     
     for i in range(len(x_data)):
         
-        ax.plot(x_data[i],y_mean_data[i], linewidth = 3, color = COLORS[i], marker = MARKERS[i], markersize = 8.0, linestyle = LINES[i], label = names[i] if names is not None else None)
+        ax.plot(x_data[i],y_mean_data[i], linewidth = 4, color = COLORS[i], marker = MARKERS[i], markersize = 8.0, linestyle = LINES[i], label = names[i] if names is not None else None)
         if y_std_data is not None:
-            ax.fill_between(x_data[i], y_mean_data[i] - y_std_data[i], y_mean_data[i] + y_std_data[i], facecolor = COLORS[i], edgecolor = COLORS[i], alpha = 0.5)
-    
-    for tick in ax.xaxis.get_major_ticks():
-        tick.label.set_fontsize(14) 
-    for tick in ax.yaxis.get_major_ticks():
-        tick.label.set_fontsize(14) 
+            ax.fill_between(x_data[i], y_mean_data[i] - y_std_data[i], y_mean_data[i] + y_std_data[i], facecolor = COLORS[i], edgecolor = COLORS[i], alpha = 0.3)
     
     if names is not None:
-        ax.legend(loc='lower right', numpoints = 1)
+        ax.legend(loc='best', numpoints = 1, fancybox=True, frameon = False)
         
     if file_name is not None:
         plt.savefig(file_name + ".pdf", format='pdf')
