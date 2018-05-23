@@ -1,6 +1,7 @@
 # Eclipse files
 .project
 .pydevproject
+.idea/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
