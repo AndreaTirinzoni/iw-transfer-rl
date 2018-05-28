@@ -9,6 +9,24 @@ __credits__ = ["Alborz Geramifard", "Robert H. Klein", "Christoph Dann",
 __license__ = "BSD 3-Clause"
 __author__ = "Christoph Dann <cdann@cdann.de>"
 
+"""
+Multi-task version of the Acrobot environment from OpenAI Gym (https://github.com/openai/gym)
+
+Info
+----
+  - State space: 4D Box (joint1 angle, joint2 angle, joint1 velocity, joint2 velocity)
+  - Action space: discrete (-2 or +2 torque)
+  - Parameters: lengths and masses of the two links, kind of task (swing-up or rotate)
+  
+References
+----
+
+  - Andrea Tirinzoni, Andrea Sessa, Matteo Pirotta, Marcello Restelli.
+    Importance Weighted Transfer of Samples in Reinforcement Learning.
+    International Conference on Machine Learning. 2017.
+"""
+
+
 class AcrobotMultitask(gym.Env):
 
     metadata = {

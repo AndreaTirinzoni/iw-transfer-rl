@@ -14,6 +14,11 @@ Info
 
 References
 ----------
+  
+  - Andrea Tirinzoni, Andrea Sessa, Matteo Pirotta, Marcello Restelli.
+    Importance Weighted Transfer of Samples in Reinforcement Learning.
+    International Conference on Machine Learning. 2017.
+    
   - https://github.com/amarack/python-rl/blob/master/pyrl/environments/puddleworld.py
 """
 

@@ -21,6 +21,10 @@ References
   - A. Castelletti, S. Galelli, M. Restelli, R. Soncini-Sessa
     Tree-based reinforcement learning for optimal water reservoir operation
     Water Resources Research 46.9 (2010)
+    
+  - Andrea Tirinzoni, Andrea Sessa, Matteo Pirotta, Marcello Restelli.
+    Importance Weighted Transfer of Samples in Reinforcement Learning.
+    International Conference on Machine Learning. 2017.
 """
 
 class Dam(gym.Env):
