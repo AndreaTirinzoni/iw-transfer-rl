@@ -23,7 +23,7 @@ References
 
   - Andrea Tirinzoni, Andrea Sessa, Matteo Pirotta, Marcello Restelli.
     Importance Weighted Transfer of Samples in Reinforcement Learning.
-    International Conference on Machine Learning. 2017.
+    International Conference on Machine Learning. 2018.
 """
 
 
