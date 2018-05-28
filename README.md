@@ -49,7 +49,7 @@ In order to reproduce our experiments, simply run the desired script file. If yo
 
 ### References
 
-[1] Andrea Tirinzoni, Andrea Sessa, Matteo Pirotta, and Marcello Restelli. Importance Weighted Transfer of Samples in Reinforcement Learning. International Conference on Machine Learning. 2018.
-[2] Ernst, Damien, Pierre Geurts, and Louis Wehenkel. "Tree-based batch mode reinforcement learning." Journal of Machine Learning Research 6.Apr (2005): 503-556.
-[3] Lazaric, Alessandro, Marcello Restelli, and Andrea Bonarini. "Transfer of samples in batch reinforcement learning." Proceedings of the 25th international conference on Machine learning. ACM, 2008.
-[4] Laroche, Romain, and Merwan Barlier. "Transfer Reinforcement Learning with Shared Dynamics." AAAI. 2017.
+[1] Andrea Tirinzoni, Andrea Sessa, Matteo Pirotta, and Marcello Restelli. Importance Weighted Transfer of Samples in Reinforcement Learning. International Conference on Machine Learning. 2018.  
+[2] Ernst, Damien, Pierre Geurts, and Louis Wehenkel. "Tree-based batch mode reinforcement learning." Journal of Machine Learning Research 6.Apr (2005): 503-556.  
+[3] Lazaric, Alessandro, Marcello Restelli, and Andrea Bonarini. "Transfer of samples in batch reinforcement learning." Proceedings of the 25th international conference on Machine learning. ACM, 2008.  
+[4] Laroche, Romain, and Merwan Barlier. "Transfer Reinforcement Learning with Shared Dynamics." AAAI. 2017.  
