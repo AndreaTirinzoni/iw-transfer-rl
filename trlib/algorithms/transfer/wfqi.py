@@ -69,7 +69,14 @@ def _predict_gp(gp, X, subtract_noise = False):
     
 class WFQI(FQI):
     """
-    Weighted Fitted Q-Iteration
+    Importance Weighted Fitted Q-Iteration (IWFQI)
+
+    References
+    ----------
+
+      - Andrea Tirinzoni, Andrea Sessa, Matteo Pirotta, Marcello Restelli.
+        Importance Weighted Transfer of Samples in Reinforcement Learning.
+        International Conference on Machine Learning. 2018.
     """
     
     def __init__(self, mdp, policy, actions, batch_size, max_iterations, regressor_type, source_datasets, var_rw, var_st, max_gp,
