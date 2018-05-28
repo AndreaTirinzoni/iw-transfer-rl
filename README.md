@@ -1,6 +1,6 @@
 # Importance Weighted Transfer of Samples in Reinforcement Learning
 
-This repository contains an implementation of the Importance Weighted Fitted Q-Iteration (IWFQI) algorithm proposed by [CITE], together with instructions on how to reproduce the experiments proposed in the paper.
+This repository contains an implementation of the Importance Weighted Fitted Q-Iteration (IWFQI) algorithm proposed by [1], together with instructions on how to reproduce the experiments proposed in the paper.Here is some text.
 
 ### Abstract
 
@@ -17,12 +17,12 @@ The repository is organized in the following folders:
 
 ### TRLIB: A Library for the Transfer of Samples in RL
 
-TRLIB is a small library for the transfer of samples in RL that we implemented to support our experiments. Currently, focus is given on transferring into Fitted Q-Iteration (FQI) [CITE]. The following algorithms are implemented:
+TRLIB is a small library for the transfer of samples in RL that we implemented to support our experiments. Currently, focus is given on transferring into Fitted Q-Iteration (FQI) [2]. The following algorithms are implemented:
 
- - Fitted Q-Iteration (FQI) [CITE];
- - Importance Weighted Fitted Q-Iteration (IWFQI) [CITE];
- - The relevance-based transfer (RBT) algorithm of [CITE];
- - The shared-dynamics transfer (SDT) algorithm of [CITE].
+ - Fitted Q-Iteration (FQI) [2];
+ - Importance Weighted Fitted Q-Iteration (IWFQI) [1];
+ - The relevance-based transfer (RBT) algorithm of [3];
+ - The shared-dynamics transfer (SDT) algorithm of [4].
 
 Besides the algorithms, TRLIB provides different environments (currently only the ones proposed in the paper), different policies, and several other useful utilities.
 
@@ -49,3 +49,7 @@ In order to reproduce our experiments, simply run the desired script file. If yo
 
 ### References
 
+[1] Andrea Tirinzoni, Andrea Sessa, Matteo Pirotta, and Marcello Restelli. Importance Weighted Transfer of Samples in Reinforcement Learning. International Conference on Machine Learning. 2018.
+[2] Ernst, Damien, Pierre Geurts, and Louis Wehenkel. "Tree-based batch mode reinforcement learning." Journal of Machine Learning Research 6.Apr (2005): 503-556.
+[3] Lazaric, Alessandro, Marcello Restelli, and Andrea Bonarini. "Transfer of samples in batch reinforcement learning." Proceedings of the 25th international conference on Machine learning. ACM, 2008.
+[4] Laroche, Romain, and Merwan Barlier. "Transfer Reinforcement Learning with Shared Dynamics." AAAI. 2017.
