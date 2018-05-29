@@ -47,10 +47,6 @@ The scripts for all experiments are under experiments/ICML2018. In particular, t
 
 In order to reproduce our experiments, simply run the desired script file. If you wish to generate new source data, each folder contains a script (generate_data.py) which runs a given policy to collect samples, fits the GPs, and saves everything in .pkl format. The policy to be used can be learned using learn_source_policy.py or can be manually coded (e.g., in the acrobot and dam environments).
 
-### License
-
-MIT
-
 ### References
 
 [1] Andrea Tirinzoni, Andrea Sessa, Matteo Pirotta, and Marcello Restelli. "Importance Weighted Transfer of Samples in Reinforcement Learning." ICML. 2018.  
