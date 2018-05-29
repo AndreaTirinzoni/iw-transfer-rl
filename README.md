@@ -1,6 +1,6 @@
 # Importance Weighted Transfer of Samples in Reinforcement Learning
 
-This repository contains an implementation of the Importance Weighted Fitted Q-Iteration (IWFQI) algorithm proposed by [1], together with instructions on how to reproduce the experiments proposed in the paper.Here is some text.
+This repository contains the code for our [paper](https://arxiv.org/abs/1805.10886) Importance Weighted Transfer of Samples in Reinforcement Learning, which was accepted at ICML 2018. We provide a small library for the transfer of samples in RL (named TRLIB), including an implementation of the Importance Weighted Fitted Q-Iteration (IWFQI) algorithm [1] together with instructions on how to reproduce the experiments proposed in the paper.
 
 ### Abstract
 
@@ -41,15 +41,19 @@ gym
 
 The scripts for all experiments are under experiments/ICML2018. In particular, there are four folders, each corresponding to one of the four domains proposed in the paper: puddle world with shared-dynamics, puddle world with puddle-based dynamics, acrobot, and the control of a water reservoir (dam). Specifically, each folder contains:
 
- - The source data used in the experiment as .pkl files. Each file contains the samples from a specific source task together with the corresponding predictions from the source/target Gaussian Processes (see Section 5 of the paper for more info);
+ - The source data used in the experiment as .pkl files. Each file contains the samples from a specific source task together with the corresponding predictions from the source/target Gaussian processes (see Section 5 of the paper for more info);
  - The scripts to run the algorithms (run_*.py). In particular, run_algorithms.py runs FQI, RBT, and SDT (the latter only if applicable), while run_wfqi runs IWFQI. For the puddle world experiments, run_wfqi_ideal runs IWFQI with ideal importance weights;
  - Other files to generate new source data (generate_data.py, learn_source_policy.py, and others).
 
 In order to reproduce our experiments, simply run the desired script file. If you wish to generate new source data, each folder contains a script (generate_data.py) which runs a given policy to collect samples, fits the GPs, and saves everything in .pkl format. The policy to be used can be learned using learn_source_policy.py or can be manually coded (e.g., in the acrobot and dam environments).
 
+### License
+
+MIT
+
 ### References
 
-[1] Andrea Tirinzoni, Andrea Sessa, Matteo Pirotta, and Marcello Restelli. Importance Weighted Transfer of Samples in Reinforcement Learning. International Conference on Machine Learning. 2018.  
+[1] Andrea Tirinzoni, Andrea Sessa, Matteo Pirotta, and Marcello Restelli. "Importance Weighted Transfer of Samples in Reinforcement Learning." ICML. 2018.  
 [2] Ernst, Damien, Pierre Geurts, and Louis Wehenkel. "Tree-based batch mode reinforcement learning." Journal of Machine Learning Research 6.Apr (2005): 503-556.  
 [3] Lazaric, Alessandro, Marcello Restelli, and Andrea Bonarini. "Transfer of samples in batch reinforcement learning." Proceedings of the 25th international conference on Machine learning. ACM, 2008.  
 [4] Laroche, Romain, and Merwan Barlier. "Transfer Reinforcement Learning with Shared Dynamics." AAAI. 2017.  
